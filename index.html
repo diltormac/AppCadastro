@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#172033" />
+    <title>OS Fácil - Pré-Cadastro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
+  <body>
+    <div
+      id="toast-container"
+      class="fixed top-4 left-0 right-0 z-50 flex flex-col items-center pointer-events-none px-4 max-w-[500px] mx-auto"
+    ></div>
+
+    <!-- MODAL DE IDENTIFICAÇÃO DO APARELHO -->
+    <div id="modalIdentificacao" class="modal-custom" style="z-index: 2000">
+      <div class="modal-box">
+        <div class="modal-header">
+          <span>Identificação do Aparelho</span>
+        </div>
+        <div style="padding: 20px">
+          <p
+            style="
+              font-size: 13px;
+              color: #475569;
+              margin-bottom: 12px;
+              text-align: center;
+            "
+          >
+            Para começar, dê um nome a este aparelho (Ex: Tablet Recepção,
+            Celular João).
+          </p>
+          <input
+            type="text"
+            id="inputNomeAparelho"
+            class="field"
+            placeholder="Digite o nome do aparelho"
+            style="text-align: center"
+          />
+        </div>
+        <div
+          style="
+            padding: 16px;
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+          "
+        >
+          <button
+            id="btnSalvarIdentificacao"
+            class="submit-button"
+            style="height: 44px; font-size: 14px"
+          >
+            Confirmar e Entrar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DE ADICIONAR SERVIÇO -->
+    <div id="modalAdicionarServico" class="modal-custom" style="z-index: 1600">
+      <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <span
+            ><i class="fa-solid fa-wrench text-indigo-600 mr-1"></i> Adicionar
+            Serviço</span
+          >
+          <button
+            id="btnFecharModalAdicionar"
+            style="
+              background: none;
+              border: none;
+              font-size: 20px;
+              color: #94a3b8;
+            "
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div
+          style="
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+          "
+        >
+          <div>
+            <label class="field-label"
+              >Serviço <span class="req">*</span></label
+            >
+
+            <!-- ===== Dropdown customizado (substitui <select> + botão do APK) ===== -->
+            <div id="modalSelectServico"></div>
+          </div>
+
+          <!-- Grupo de Cor (Reforma) -->
+          <div id="modalGrupoCor" class="hidden">
+            <label class="field-label"
+              >Cor da Roda <span class="req">*</span></label
+            >
+            <input
+              type="text"
+              id="modalInputCor"
+              class="field"
+              placeholder="Ex: BLACK PIANO"
+              autocomplete="off"
+            />
+          </div>
+
+          <!-- NOVO Grupo de Placa (Alinhamento/Camber/Caster) -->
+          <div id="modalGrupoPlaca" class="hidden">
+            <label class="field-label"
+              >Placa do Veículo <span class="req">*</span></label
+            >
+            <input
+              type="text"
+              id="modalInputPlaca"
+              class="field"
+              placeholder="Ex: ABC1D23"
+              maxlength="8"
+              autocomplete="off"
+            />
+          </div>
+
+          <!-- Grupo de Número OS (Conserto/Solda) -->
+          <div id="modalGrupoNumero" class="hidden">
+            <label class="field-label"
+              >Número da OS <span class="req">*</span></label
+            >
+            <input
+              type="text"
+              id="modalInputNumero"
+              class="field"
+              placeholder="Digite o número"
+              inputmode="numeric"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="field-label"
+                >Quantidade <span class="req">*</span></label
+              >
+              <input
+                type="number"
+                id="modalInputQtd"
+                min="1"
+                value="1"
+                class="field bg-slate-800 text-white"
+              />
+            </div>
+            <div>
+              <label class="field-label"
+                >Valor (R$) <span class="req">*</span></label
+              >
+              <input
+                type="tel"
+                id="modalInputValor"
+                class="field bg-slate-800 text-white font-bold text-emerald-400"
+                placeholder="R$ 0,00"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div
+          style="
+            padding: 16px;
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+          "
+        >
+          <button
+            id="btnConfirmarItem"
+            class="submit-button"
+            style="height: 44px; font-size: 14px"
+          >
+            <i class="fa-solid fa-plus"></i> Adicionar à OS
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOVO MODAL DE PLACA OPCIONAL -->
+    <div id="modalPlacaOpcional" class="modal-custom" style="z-index: 1600">
+      <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <span
+            ><i class="fa-solid fa-car text-indigo-600 mr-1"></i> Placa do
+            Veículo</span
+          >
+          <button
+            id="btnFecharModalPlaca"
+            style="
+              background: none;
+              border: none;
+              font-size: 20px;
+              color: #94a3b8;
+            "
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div
+          style="
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+          "
+        >
+          <div>
+            <label class="field-label">Placa (Opcional)</label>
+            <input
+              type="text"
+              id="inputPlacaOpcional"
+              class="field"
+              placeholder="Ex: ABC1D23"
+              maxlength="8"
+              autocomplete="off"
+            />
+          </div>
+        </div>
+        <div
+          style="
+            padding: 16px;
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+          "
+        >
+          <button
+            id="btnSalvarPlacaOpcional"
+            class="submit-button"
+            style="height: 44px; font-size: 14px"
+          >
+            <i class="fa-solid fa-check"></i> Salvar Placa
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DE DETALHES DO SERVIÇO -->
+    <div
+      id="modalDetalhesServico"
+      class="modal-custom"
+      style="z-index: 1500; display: none"
+    >
+      <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <span id="tituloModalDetalhes"
+            ><i class="fa-solid fa-sliders text-indigo-600 mr-1"></i> Detalhes
+            do Serviço</span
+          >
+          <button
+            id="btnFecharModalDetalhes"
+            style="
+              background: none;
+              border: none;
+              font-size: 20px;
+              color: #94a3b8;
+            "
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div
+          style="
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+          "
+        >
+          <div id="grupoCorModal">
+            <label for="inputCor" class="field-label"
+              >Cor <span class="req">*</span></label
+            >
+            <input
+              type="text"
+              id="inputCor"
+              class="field"
+              placeholder="Digite a cor"
+              autocomplete="off"
+            />
+          </div>
+          <div>
+            <label for="inputNumeroOSDinamico" class="field-label"
+              >Número da OS <span class="req">*</span></label
+            >
+            <input
+              type="text"
+              id="inputNumeroOSDinamico"
+              class="field"
+              placeholder="Digite o número da OS"
+              autocomplete="off"
+              inputmode="numeric"
+            />
+          </div>
+        </div>
+        <div
+          style="
+            padding: 16px;
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+          "
+        >
+          <button
+            id="btnSalvarDetalhes"
+            class="submit-button"
+            style="height: 44px; font-size: 14px"
+          >
+            <i class="fa-solid fa-check"></i> Confirmar Detalhes
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DE OPÇÕES GENÉRICO -->
+    <div id="customModal" class="modal-custom">
+      <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <span id="modalTitle">Selecione</span>
+          <button
+            id="btnFecharModalOpcoes"
+            style="
+              background: none;
+              border: none;
+              font-size: 20px;
+              color: #94a3b8;
+            "
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div id="modalList" class="modal-list"></div>
+      </div>
+    </div>
+
+    <!-- MODAL DE PESQUISA -->
+    <div
+      id="modalPesquisa"
+      class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-3"
+    >
+      <div
+        class="bg-white rounded-2xl flex flex-col overflow-hidden shadow-2xl w-full max-w-md h-[80vh]"
+      >
+        <div
+          class="bg-[#172033] text-white p-4 flex items-center justify-between flex-shrink-0"
+        >
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-magnifying-glass text-indigo-400"></i>
+            <h2 class="text-sm font-bold">Pesquisar Ordem de Serviço</h2>
+          </div>
+          <button
+            type="button"
+            id="btnFecharPesquisa"
+            class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/20 transition-colors"
+          >
+            <i class="fa-solid fa-xmark text-sm"></i>
+          </button>
+        </div>
+
+        <div class="p-3 bg-slate-100 border-b border-slate-200 flex-shrink-0">
+          <div class="relative">
+            <i
+              class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"
+            ></i>
+            <input
+              id="inputBusca"
+              type="text"
+              class="field pl-8 uppercase"
+              placeholder="Digite o nome ou ID/nº do serviço..."
+            />
+          </div>
+        </div>
+
+        <div
+          id="listaResultados"
+          class="flex-1 overflow-y-auto p-3 flex flex-col gap-3 bg-slate-50"
+        >
+          <div class="text-center py-10 text-slate-400 text-xs">
+            <i class="fa-solid fa-clipboard text-2xl mb-2 text-slate-300"></i>
+            <p>Digite algo para pesquisar os serviços salvos.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DE IMAGENS -->
+    <div
+      id="modalImagens"
+      class="fixed inset-0 z-[60] bg-black/95 hidden flex flex-col justify-between p-4"
+    >
+      <div
+        class="flex justify-between items-center text-white z-10 relative mt-8"
+      >
+        <span
+          id="contadorFotoModal"
+          class="text-sm font-semibold bg-white/10 px-3 py-1 rounded-full"
+          >1/1</span
+        >
+        <button
+          type="button"
+          id="btnFecharImagens"
+          class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition"
+        >
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div
+        class="flex-1 flex items-center justify-between relative py-4 overflow-hidden"
+        id="areaImagem"
+      >
+        <button
+          id="btnPrev"
+          class="absolute left-2 md:left-10 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-xl transition hidden"
+        >
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <img
+          id="imagemAmpliada"
+          src=""
+          class="max-w-full max-h-full object-contain rounded-lg shadow-2xl mx-auto transition-opacity duration-200"
+          alt="Foto Ampliada"
+        />
+        <button
+          id="btnNext"
+          class="absolute right-2 md:right-10 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-xl transition hidden"
+        >
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
+
+      <div class="text-center text-slate-400 text-xs py-2 z-10 relative mb-4">
+        Deslize para os lados ou use as setas
+      </div>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="app">
+      <header class="app-header">
+        <div class="flex items-center gap-3">
+          <div
+            class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white/10"
+          >
+            <i class="fa-solid fa-clipboard-list text-xl"></i>
+          </div>
+          <div class="min-w-0">
+            <h1 class="text-base font-bold leading-tight">OS Fácil</h1>
+            <p
+              class="mt-1 text-[10px] text-slate-300 flex items-center gap-1 cursor-pointer hover:text-white transition"
+              id="triggerAlterarNome"
+            >
+              <i class="fa-solid fa-mobile-screen text-[9px]"></i>
+              <span id="nomeAparelhoDisplay">Carregando...</span>
+              <i class="fa-solid fa-pen text-[8px] ml-1 opacity-50"></i>
+            </p>
+          </div>
+          <div class="ml-auto flex items-center gap-2">
+            <button
+              type="button"
+              id="btnAbrirPesquisa"
+              onclick="window.location.replace('./os_painel/index.html')"
+              class="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-1.5 px-3 rounded-lg shadow transition-colors"
+            >
+              <i class="fa-solid fa-table-list text-[10px]"></i>
+              <span class="hidden sm:inline">Painel OS</span>
+            </button>
+          </div>
+        </div>
+        <div class="header-step">
+          <div class="step-dot active" id="step1"></div>
+          <div class="step-dot" id="step2"></div>
+          <div class="step-dot" id="step3"></div>
+        </div>
+      </header>
+
+      <main class="app-main">
+        <form id="osForm" class="flex min-h-0 flex-1 flex-col gap-2" novalidate>
+          <section class="form-card" id="cardCliente">
+            <div class="mb-2 flex items-center gap-2">
+              <i class="fa-solid fa-user text-xs text-indigo-600"></i>
+              <h2 class="text-sm font-bold text-slate-800">Dados do cliente</h2>
+              <span class="field-hint" id="hintCliente">1 de 3</span>
+            </div>
+            <div class="mb-3">
+              <label for="nome" class="field-label"
+                >Nome do cliente (Opcional)</label
+              >
+              <div class="field-wrap">
+                <i class="fa-solid fa-user field-icon"></i>
+                <input
+                  id="nome"
+                  name="nome"
+                  class="field"
+                  type="text"
+                  placeholder="Consumidor"
+                  autocomplete="name"
+                />
+                <i
+                  class="fa-solid fa-circle-check field-status ok"
+                  id="statusNome"
+                  style="display: none"
+                ></i>
+              </div>
+            </div>
+            <div>
+              <label for="telefone" class="field-label"
+                >Telefone (Opcional)</label
+              >
+              <div class="flex gap-2">
+                <input type="hidden" id="paisDDI" value="+55" />
+                <button type="button" id="btnDDI" class="btn-ddi">
+                  🇧🇷 +55
+                </button>
+                <div class="field-wrap">
+                  <i class="fa-solid fa-phone field-icon"></i>
+                  <input
+                    id="telefone"
+                    name="telefone"
+                    class="field"
+                    type="tel"
+                    placeholder="(00) 00000-0000"
+                    autocomplete="tel"
+                    inputmode="tel"
+                  />
+                  <i
+                    class="fa-solid fa-circle-check field-status ok"
+                    id="statusTelefone"
+                    style="display: none"
+                  ></i>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="form-card" id="cardServico">
+            <div class="mb-2 flex items-center gap-2">
+              <i
+                class="fa-solid fa-screwdriver-wrench text-xs text-indigo-600"
+              ></i>
+              <h2 class="text-sm font-bold text-slate-800">Dados do serviço</h2>
+              <span class="field-hint" id="hintServico">2 de 3</span>
+            </div>
+
+            <!-- LISTA DE ITENS JÁ ADICIONADOS -->
+            <div
+              id="containerItensAdicionados"
+              class="flex flex-col gap-2 mb-3"
+            ></div>
+
+            <!-- BOTÕES LADO A LADO -->
+            <div class="flex gap-2 mb-3">
+              <!-- Botão Adicionar Serviço (Ocupa 2/3) -->
+              <button
+                type="button"
+                id="btnAdicionarItem"
+                class="flex-[2] h-12 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-lg shadow-md transition-colors flex items-center justify-center gap-2"
+              >
+                <i class="fa-solid fa-plus"></i> Adicionar Serviço
+              </button>
+
+              <!-- Botão Adicionar Placa (Ocupa 1/3) -->
+              <button
+                type="button"
+                id="btnAdicionarPlaca"
+                class="flex-1 h-12 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1.5"
+              >
+                <i class="fa-solid fa-car"></i> Placa
+              </button>
+            </div>
+
+            <div class="mt-3">
+              <label for="observacao" class="field-label"
+                >Descrição do serviço <span class="req">*</span></label
+              >
+              <textarea
+                id="observacao"
+                name="observacao"
+                class="field"
+                placeholder="Descreva o problema..."
+                required
+              ></textarea>
+            </div>
+          </section>
+
+          <section class="photo-section" id="photoSection">
+            <div class="mb-2 flex flex-shrink-0 items-center justify-between">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-camera text-xs text-indigo-600"></i>
+                <h2 class="text-sm font-bold text-slate-800">
+                  Fotos do serviço <span class="req">*</span>
+                </h2>
+              </div>
+              <span
+                id="photoCount"
+                class="rounded-full bg-indigo-50 px-2 py-1 text-[11px] font-bold text-indigo-700"
+                >0/6 fotos</span
+              >
+            </div>
+            <p class="mb-2 flex-shrink-0 text-[11px] text-slate-500">
+              <i class="fa-solid fa-circle-info mr-1 text-indigo-400"></i>
+              Adicione pelo menos 1 foto.
+            </p>
+            <div id="photoGrid" class="photo-grid"></div>
+          </section>
+        </form>
+      </main>
+
+      <footer class="app-footer">
+        <button
+          id="submitButton"
+          type="submit"
+          form="osForm"
+          class="submit-button"
+        >
+          <i class="fa-solid fa-check"></i> ENVIAR PRÉ-CADASTRO
+        </button>
+      </footer>
+    </div>
+
+    <!-- Bibliotecas e Módulo Principal -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      (function setupCamera() {
+        if (
+          window.Capacitor &&
+          window.Capacitor.Plugins &&
+          window.Capacitor.Plugins.Camera
+        ) {
+          window.Camera = window.Capacitor.Plugins.Camera;
+        } else if (
+          window.Capacitor &&
+          typeof window.Capacitor.registerPlugin === "function"
+        ) {
+          try {
+            window.Camera = window.Capacitor.registerPlugin("Camera");
+          } catch (_) {}
+        }
+      })();
+    </script>
+    <script type="module" src="./js/app.js"></script>
+  </body>
+</html>
