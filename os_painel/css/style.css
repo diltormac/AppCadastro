@@ -1,0 +1,455 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  font-family: "Inter", sans-serif;
+}
+
+input[type="text"],
+textarea {
+  text-transform: uppercase;
+}
+input[type="text"]::placeholder,
+textarea::placeholder {
+  text-transform: none;
+}
+input[type="tel"],
+input[type="number"],
+input[type="email"],
+input[type="password"] {
+  text-transform: none;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+.sidebar-link:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+}
+.sidebar-link.active {
+  background: linear-gradient(
+    90deg,
+    rgba(67, 94, 219, 0.2),
+    rgba(67, 94, 219, 0.05)
+  );
+  color: white;
+  border-left: 3px solid #435edb;
+  padding-left: 11px;
+}
+.sidebar-link i {
+  width: 18px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.stat-card {
+  background: white;
+  border: 1px solid #e6eaf0;
+  border-radius: 14px;
+  padding: 14px;
+  transition: all 0.2s;
+}
+@media (min-width: 1024px) {
+  .stat-card {
+    padding: 18px;
+  }
+}
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -8px rgba(23, 32, 51, 0.12);
+}
+
+.table-row {
+  transition: background 0.15s;
+  cursor: pointer;
+}
+.table-row:hover {
+  background: #f8fafc;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.badge-pendente {
+  background: #fef3c7;
+  color: #92400e;
+}
+.badge-pendente .badge-dot {
+  background: #f59e0b;
+}
+.badge-andamento {
+  background: #dbeafe;
+  color: #1e40af;
+}
+.badge-andamento .badge-dot {
+  background: #3b82f6;
+}
+.badge-concluido {
+  background: #dcfce7;
+  color: #166534;
+}
+.badge-concluido .badge-dot {
+  background: #22c55e;
+}
+.badge-cancelado {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.badge-cancelado .badge-dot {
+  background: #ef4444;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #435edb;
+  box-shadow: 0 0 0 3px rgba(67, 94, 219, 0.12);
+}
+
+/* ---------- BOTÕES DE FILTRO ---------- */
+.filter-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.15s;
+  border: 1px solid #e6eaf0;
+  background: white;
+  color: #465166;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+}
+.filter-btn:hover {
+  background: #f1f5f9;
+}
+.filter-btn.active {
+  background: #435edb;
+  color: white;
+  border-color: #435edb;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  z-index: 50;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+@media (min-width: 640px) {
+  .modal-overlay {
+    padding: 24px;
+  }
+}
+.modal-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.modal-content {
+  background: white;
+  border-radius: 18px;
+  width: 100%;
+  max-width: 720px;
+  max-height: 95vh;
+  overflow-y: auto;
+  transform: scale(0.95);
+  transition: transform 0.2s;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+}
+@media (min-width: 640px) {
+  .modal-content {
+    max-height: 90vh;
+  }
+}
+.modal-overlay.show .modal-content {
+  transform: scale(1);
+}
+
+.photo-thumb {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #e6eaf0;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.photo-thumb:hover {
+  transform: scale(1.03);
+}
+
+.toast {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  padding: 14px 20px;
+  border-radius: 12px;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+  z-index: 100;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.3s;
+  text-align: center;
+}
+@media (min-width: 640px) {
+  .toast {
+    left: auto;
+    right: 24px;
+    bottom: 24px;
+    text-align: left;
+  }
+}
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+.toast-success {
+  background: #16a34a;
+}
+.toast-error {
+  background: #dc2626;
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  padding: 20px;
+}
+.lightbox.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.lightbox img {
+  max-width: 100%;
+  max-height: 85vh;
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  transform: scale(0.95);
+  transition: transform 0.3s;
+  user-select: none;
+}
+.lightbox.show img {
+  transform: scale(1);
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 20px;
+  border: none;
+  z-index: 210;
+}
+.lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    transform 0.2s;
+  font-size: 18px;
+  border: none;
+  z-index: 210;
+}
+.lightbox-nav:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-50%) scale(1.1);
+}
+.lightbox-nav.prev {
+  left: 16px;
+}
+.lightbox-nav.next {
+  right: 16px;
+}
+
+.lightbox-counter {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 210;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.edit-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #172033;
+  outline: none;
+  transition: border-color 0.2s;
+  background: white;
+}
+.edit-input:focus {
+  border-color: #435edb;
+  box-shadow: 0 0 0 2px rgba(67, 94, 219, 0.1);
+}
+
+/* ---------- HARDEN: estados de erro, valores longos, fotos indisponíveis ---------- */
+.edit-input.is-invalid,
+.edit-input[aria-invalid="true"] {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
+}
+
+/* Faturamento com muitos dígitos diminui em vez de ser cortado. */
+#statFaturamento {
+  font-variant-numeric: tabular-nums;
+}
+#statFaturamento.valor-longo {
+  font-size: 0.875rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+@media (min-width: 1024px) {
+  #statFaturamento.valor-longo {
+    font-size: 1.05rem;
+  }
+}
+
+.foto-indisponivel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  color: #94a3b8;
+  border: 1px dashed #cbd5e1;
+}
+.foto-indisponivel.photo-thumb {
+  cursor: default;
+}
+.foto-indisponivel.photo-thumb:hover {
+  transform: none;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+#btnAtualizar:disabled {
+  opacity: 0.6;
+}
+
+:focus-visible {
+  outline: 2px solid #435edb;
+  outline-offset: 2px;
+}
+
+/* ---------- REMOVER SETINHAS DOS INPUTS NUMBER ---------- */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* ---------- ESTILO DO CALENDÁRIO CUSTOMIZADO (FLATPICKR) ---------- */
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected.inRange,
+.flatpickr-day.selected:focus,
+.flatpickr-day.selected:hover,
+.flatpickr-day.selected.prevMonthDay,
+.flatpickr-day.selected.nextMonthDay {
+  background: #435edb !important;
+  border-color: #435edb !important;
+}
+.flatpickr-calendar {
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid #e6eaf0 !important;
+  font-family: "Inter", sans-serif;
+}

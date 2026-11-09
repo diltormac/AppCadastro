@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=5.0"
+    />
+    <title>OS Fácil — Painel de Ordens de Serviço</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+    <style>
+      body.is-electron .esconder-no-electron {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-100 h-screen overflow-hidden flex">
+    <!-- ============ OVERLAY (mobile) ============ -->
+    <div
+      id="sidebarOverlay"
+      class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 hidden lg:hidden"
+      onclick="fecharSidebar()"
+    ></div>
+
+    <!-- ================= SIDEBAR ================= -->
+    <aside
+      id="sidebar"
+      class="fixed lg:static inset-y-0 left-0 z-40 w-64 bg-slate-900 text-white flex flex-col flex-shrink-0 border-r border-slate-800 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-out"
+    >
+      <div class="px-5 py-5 border-b border-slate-800 flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center shadow-lg shadow-indigo-900/40 flex-shrink-0"
+        >
+          <i class="fa-solid fa-clipboard-list text-lg"></i>
+        </div>
+        <div class="min-w-0">
+          <p class="font-extrabold text-base leading-none">OS Fácil</p>
+          <p class="text-[10px] text-slate-400 mt-1 tracking-wider uppercase">
+            Painel Admin
+          </p>
+        </div>
+        <button
+          onclick="fecharSidebar()"
+          class="lg:hidden ml-auto w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center text-slate-400"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="px-3 pt-3">
+        <button
+          onclick="window.location.href = '../index.html'"
+          class="esconder-no-electron w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-md text-sm font-semibold transition-colors"
+        >
+          <i class="fa-solid fa-arrow-left text-sm"></i>
+          Cadastro de O.S
+        </button>
+      </div>
+
+      <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <p
+          class="text-[10px] text-slate-500 font-bold uppercase px-3 mb-2 tracking-wider"
+        >
+          Principal
+        </p>
+        <a class="sidebar-link active" data-view="dashboard">
+          <i class="fa-solid fa-chart-pie"></i>Dashboard
+        </a>
+        <a class="sidebar-link" data-view="os">
+          <i class="fa-solid fa-clipboard-list"></i>Todas as OS
+          <span
+            id="badgeTotal"
+            class="ml-auto bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full"
+            >0</span
+          >
+        </a>
+        <a class="sidebar-link" data-view="fotos">
+          <i class="fa-solid fa-images"></i>Galeria de Fotos
+        </a>
+
+        <p
+          class="text-[10px] text-slate-500 font-bold uppercase px-3 mt-5 mb-2 tracking-wider"
+        >
+          Filtros rápidos
+        </p>
+        <a class="sidebar-link" data-filter="Pendente">
+          <i class="fa-solid fa-clock text-amber-400"></i>Pendentes
+          <span
+            id="badgePendente"
+            class="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300"
+            >0</span
+          >
+        </a>
+        <a class="sidebar-link" data-filter="Em andamento">
+          <i class="fa-solid fa-spinner text-blue-400"></i>Em andamento
+          <span
+            id="badgeAndamento"
+            class="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300"
+            >0</span
+          >
+        </a>
+        <a class="sidebar-link" data-filter="Concluído">
+          <i class="fa-solid fa-circle-check text-green-400"></i>Concluídos
+          <span
+            id="badgeConcluido"
+            class="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-500/20 text-green-300"
+            >0</span
+          >
+        </a>
+      </nav>
+
+      <div class="px-4 py-4 border-t border-slate-800 flex items-center gap-3">
+        <div
+          class="w-9 h-9 rounded-full bg-gradient-to-br from-sky-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+        >
+          AD
+        </div>
+        <div class="min-w-0">
+          <p class="text-sm font-semibold truncate">Admin</p>
+          <p class="text-[10px] text-slate-400 truncate">admin@osfacil.com</p>
+        </div>
+        <button
+          class="ml-auto text-slate-400 hover:text-white transition flex-shrink-0"
+        >
+          <i class="fa-solid fa-right-from-bracket text-sm"></i>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ================= MAIN ================= -->
+    <div class="flex-1 flex flex-col overflow-hidden min-w-0">
+      <header class="bg-white border-b border-slate-200 flex-shrink-0">
+        <div
+          class="px-3 md:px-6 py-3 flex items-center gap-2 md:gap-3 flex-wrap"
+        >
+          <button
+            id="mobileMenuBtn"
+            onclick="abrirSidebar()"
+            class="lg:hidden w-9 h-9 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 flex-shrink-0"
+          >
+            <i class="fa-solid fa-bars text-sm"></i>
+          </button>
+
+          <div class="min-w-0">
+            <h1
+              id="pageTitle"
+              class="text-base md:text-lg font-bold text-slate-800 truncate"
+            >
+              Dashboard
+            </h1>
+            <p
+              id="pageSubtitle"
+              class="text-[10px] md:text-xs text-slate-500 truncate hidden sm:block"
+            >
+              Visão geral das ordens de serviço
+            </p>
+          </div>
+
+          <button
+            id="btnAtualizar"
+            aria-label="Atualizar dados"
+            onclick="carregarDados()"
+            class="md:ml-0 ml-auto md:order-last w-9 h-9 rounded-lg border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 flex-shrink-0"
+            title="Atualizar dados"
+          >
+            <i class="fa-solid fa-rotate-right text-sm"></i>
+          </button>
+
+          <div
+            class="relative order-last w-full md:order-none md:w-64 lg:w-72 md:ml-auto"
+          >
+            <i
+              class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"
+            ></i>
+            <input
+              id="searchInput"
+              type="text"
+              placeholder="Buscar OS, cliente, telefone..."
+              class="search-input w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 placeholder:text-slate-400 transition"
+            />
+          </div>
+        </div>
+      </header>
+
+      <main class="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">
+        <!-- ============ DASHBOARD VIEW ============ -->
+        <div id="viewDashboard" class="space-y-4 lg:space-y-6">
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+            <div class="stat-card">
+              <div class="flex items-start justify-between mb-2 lg:mb-3">
+                <div
+                  class="w-9 h-9 lg:w-10 lg:h-10 rounded-xl bg-indigo-50 flex items-center justify-center"
+                >
+                  <i
+                    class="fa-solid fa-clipboard-list text-indigo-600 text-sm lg:text-base"
+                  ></i>
+                </div>
+                <span
+                  class="text-[9px] lg:text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full"
+                >
+                  <i class="fa-solid fa-arrow-up mr-1"></i>Total
+                </span>
+              </div>
+              <p
+                class="text-xl lg:text-2xl font-extrabold text-slate-800"
+                id="statTotal"
+              >
+                0
+              </p>
+              <p
+                class="text-[10px] lg:text-xs text-slate-500 mt-1 leading-tight"
+              >
+                Ordens cadastradas
+              </p>
+            </div>
+
+            <div class="stat-card">
+              <div class="flex items-start justify-between mb-2 lg:mb-3">
+                <div
+                  class="w-9 h-9 lg:w-10 lg:h-10 rounded-xl bg-amber-50 flex items-center justify-center"
+                >
+                  <i
+                    class="fa-solid fa-clock text-amber-600 text-sm lg:text-base"
+                  ></i>
+                </div>
+              </div>
+              <p
+                class="text-xl lg:text-2xl font-extrabold text-slate-800"
+                id="statPendente"
+              >
+                0
+              </p>
+              <p
+                class="text-[10px] lg:text-xs text-slate-500 mt-1 leading-tight"
+              >
+                Pendentes
+              </p>
+            </div>
+
+            <div class="stat-card">
+              <div class="flex items-start justify-between mb-2 lg:mb-3">
+                <div
+                  class="w-9 h-9 lg:w-10 lg:h-10 rounded-xl bg-blue-50 flex items-center justify-center"
+                >
+                  <i
+                    class="fa-solid fa-spinner text-blue-600 text-sm lg:text-base"
+                  ></i>
+                </div>
+              </div>
+              <p
+                class="text-xl lg:text-2xl font-extrabold text-slate-800"
+                id="statAndamento"
+              >
+                0
+              </p>
+              <p
+                class="text-[10px] lg:text-xs text-slate-500 mt-1 leading-tight"
+              >
+                Em andamento
+              </p>
+            </div>
+
+            <!-- CARD DE FATURAMENTO COM SENHA -->
+            <div
+              id="cardFaturamento"
+              class="stat-card cursor-pointer relative overflow-hidden group"
+              role="button"
+              tabindex="0"
+              aria-label="Faturamento oculto. Digite a senha para ver"
+              onclick="alternarFaturamento()"
+            >
+              <div class="flex items-start justify-between mb-2 lg:mb-3">
+                <div
+                  class="w-9 h-9 lg:w-10 lg:h-10 rounded-xl bg-emerald-50 flex items-center justify-center"
+                >
+                  <i
+                    class="fa-solid fa-dollar-sign text-emerald-600 text-sm lg:text-base"
+                  ></i>
+                </div>
+                <span
+                  class="text-slate-400 group-hover:text-slate-600 transition-colors"
+                >
+                  <i
+                    id="iconeCadeado"
+                    class="fa-solid fa-eye-slash text-xs"
+                  ></i>
+                </span>
+              </div>
+              <p
+                class="text-sm lg:text-xl font-extrabold text-slate-800 whitespace-nowrap overflow-hidden text-ellipsis"
+                id="statFaturamento"
+              >
+                ••••••
+              </p>
+              <p
+                class="text-[10px] lg:text-xs text-slate-500 mt-1 leading-tight"
+              >
+                Faturamento total
+                <span class="block text-[9px] lg:text-[10px] text-slate-400"
+                  >exceto canceladas</span
+                >
+              </p>
+            </div>
+          </div>
+
+          <div
+            class="bg-white border border-slate-200 rounded-2xl overflow-hidden"
+          >
+            <div
+              class="px-4 lg:px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/50 gap-3"
+            >
+              <div class="min-w-0">
+                <h2 class="font-bold text-slate-800 text-sm lg:text-base">
+                  Últimas ordens de serviço
+                </h2>
+                <p class="text-[10px] lg:text-xs text-slate-500 mt-0.5">
+                  As 10 mais recentes do banco
+                </p>
+              </div>
+              <button
+                class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 flex-shrink-0"
+                onclick="mudarView('os')"
+              >
+                Ver todas <i class="fa-solid fa-arrow-right text-[10px]"></i>
+              </button>
+            </div>
+            <div id="recentList" class="flex flex-col"></div>
+          </div>
+        </div>
+
+        <!-- ============ OS VIEW ============ -->
+        <div id="viewOS" class="hidden space-y-4">
+          <!-- CARD DE FILTROS -->
+          <div
+            class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col gap-3"
+          >
+            <!-- Linha 1: Botões de Status -->
+            <div class="flex gap-2 overflow-x-auto pb-1 lg:pb-0">
+              <button class="filter-btn active flex-shrink-0" data-status="all">
+                Todas
+              </button>
+              <button class="filter-btn flex-shrink-0" data-status="Pendente">
+                Pendentes
+              </button>
+              <button
+                class="filter-btn flex-shrink-0"
+                data-status="Em andamento"
+              >
+                Em andamento
+              </button>
+              <button class="filter-btn flex-shrink-0" data-status="Concluído">
+                Concluídas
+              </button>
+              <button class="filter-btn flex-shrink-0" data-status="Cancelado">
+                Canceladas
+              </button>
+            </div>
+
+            <!-- Linha 2: Ordenação, Serviço e Datas -->
+            <div
+              class="flex flex-wrap items-center gap-3 pt-3 border-t border-slate-100"
+            >
+              <!-- Ordenação -->
+              <div class="flex items-center gap-2">
+                <label
+                  class="text-[10px] font-bold text-slate-500 uppercase hidden sm:block"
+                  >Ordenar</label
+                >
+                <div id="sortSelect" class="w-[130px]"></div>
+              </div>
+
+              <!-- Serviço -->
+              <div class="flex items-center gap-2">
+                <label
+                  class="text-[10px] font-bold text-slate-500 uppercase hidden sm:block"
+                  >Serviço</label
+                >
+                <div id="filtroServico" class="w-[160px]"></div>
+              </div>
+
+              <!-- Datas -->
+              <div class="flex items-center gap-2">
+                <label
+                  class="text-[10px] font-bold text-slate-500 uppercase hidden sm:block"
+                  >De</label
+                >
+                <div class="relative flex items-center">
+                  <input
+                    type="text"
+                    id="dataInicial"
+                    placeholder="De"
+                    class="h-[34px] pl-2 pr-8 border border-slate-200 rounded-lg text-xs w-28"
+                  />
+                  <i
+                    class="fa-regular fa-calendar absolute right-2 text-slate-400 pointer-events-none"
+                  ></i>
+                </div>
+
+                <label
+                  class="text-[10px] font-bold text-slate-500 uppercase hidden sm:block"
+                  >Até</label
+                >
+                <div class="relative flex items-center">
+                  <input
+                    type="text"
+                    id="dataFinal"
+                    placeholder="Até"
+                    class="h-[34px] pl-2 pr-8 border border-slate-200 rounded-lg text-xs w-28"
+                  />
+                  <i
+                    class="fa-regular fa-calendar absolute right-2 text-slate-400 pointer-events-none"
+                  ></i>
+                </div>
+
+                <button
+                  type="button"
+                  id="btnLimparDatas"
+                  class="h-[34px] px-3 ml-2 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 transition"
+                >
+                  Limpar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabela (desktop) -->
+          <div
+            id="desktopOSWrapper"
+            class="hidden lg:block bg-white border border-slate-200 rounded-2xl overflow-x-auto"
+          >
+            <table class="w-full min-w-[1100px]">
+              <thead class="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th
+                    class="text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-3 whitespace-nowrap"
+                  >
+                    Nº OS
+                  </th>
+                  <th
+                    class="text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-3 whitespace-nowrap"
+                  >
+                    Cliente
+                  </th>
+                  <th
+                    class="text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-3 whitespace-nowrap"
+                  >
+                    Telefone
+                  </th>
+                  <th
+                    class="text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-3"
+                  >
+                    Serviço
+                  </th>
+                  <th
+                    class="text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-3 whitespace-nowrap"
+                  >
+                    Placa
+                  </th>
+                  <th
+                    class="text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-3 whitespace-nowrap"
+                  >
+                    Cor
+                  </th>
+                  <th
+                    class="text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-3 whitespace-nowrap"
+                  >
+                    Origem
+                  </th>
+                  <th
+                    class="text-right text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-3 whitespace-nowrap"
+                  >
+                    Valor
+                  </th>
+                  <th
+                    class="text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-3 whitespace-nowrap"
+                  >
+                    Status
+                  </th>
+                  <th
+                    class="text-right text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-3 whitespace-nowrap"
+                  >
+                    Ações
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tableBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+            <div id="carregarMaisDesktop"></div>
+          </div>
+
+          <!-- Cards (mobile / tablet) -->
+          <div id="mobileOSWrapper" class="lg:hidden space-y-3">
+            <div id="mobileList" class="space-y-3"></div>
+            <div id="carregarMaisMobile"></div>
+          </div>
+
+          <!-- Estado vazio (compartilhado) -->
+          <div
+            id="emptyState"
+            class="hidden bg-white border border-slate-200 rounded-2xl px-5 py-16 text-center"
+          >
+            <div
+              class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3"
+            >
+              <i class="fa-solid fa-inbox text-2xl text-slate-400"></i>
+            </div>
+            <p class="text-sm font-semibold text-slate-700">
+              Nenhuma OS encontrada
+            </p>
+            <p class="text-xs text-slate-500 mt-1">
+              Tente ajustar os filtros ou a busca.
+            </p>
+          </div>
+        </div>
+
+        <!-- ============ FOTOS VIEW ============ -->
+        <div id="viewFotos" class="hidden">
+          <div
+            class="bg-white border border-slate-200 rounded-2xl p-3 sm:p-4 lg:p-6"
+          >
+            <div class="flex items-center justify-between mb-4 lg:mb-5 gap-3">
+              <div class="min-w-0">
+                <h2 class="font-bold text-slate-800 text-sm lg:text-base">
+                  Galeria de fotos
+                </h2>
+                <p class="text-[10px] lg:text-xs text-slate-500 mt-0.5">
+                  Todas as fotos enviadas nas OS
+                </p>
+              </div>
+              <span
+                id="fotosCount"
+                class="text-[10px] lg:text-xs font-bold text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-full whitespace-nowrap"
+              >
+                0 fotos
+              </span>
+            </div>
+            <div
+              id="galeriaGrid"
+              class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 lg:gap-3"
+            ></div>
+            <div id="galeriaEmpty" class="hidden py-16 text-center">
+              <div
+                class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3"
+              >
+                <i class="fa-solid fa-images text-2xl text-slate-400"></i>
+              </div>
+              <p class="text-sm font-semibold text-slate-700">
+                Nenhuma foto cadastrada
+              </p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- ================= MODAL ================= -->
+    <div id="modalDetalhes" class="modal-overlay">
+      <div
+        class="modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modalTitle"
+      >
+        <div
+          class="sticky top-0 bg-white border-b border-slate-200 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between rounded-t-[18px] z-10"
+        >
+          <div class="min-w-0">
+            <h2
+              class="font-bold text-slate-800 text-sm sm:text-base"
+              id="modalTitle"
+            >
+              Editar OS
+            </h2>
+            <p
+              class="text-[10px] sm:text-xs text-slate-500 mt-0.5 truncate"
+              id="modalSubtitle"
+            ></p>
+          </div>
+          <button
+            aria-label="Fechar"
+            onclick="fecharModal()"
+            class="w-9 h-9 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition flex-shrink-0"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div id="modalBody" class="p-3 sm:p-6 space-y-4 sm:space-y-5"></div>
+      </div>
+    </div>
+
+    <!-- ================= LIGHTBOX ================= -->
+    <div id="lightbox" class="lightbox" onclick="fecharLightbox(event)">
+      <button
+        class="lightbox-close"
+        aria-label="Fechar foto"
+        onclick="fecharLightbox(event)"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <button
+        id="lightboxPrev"
+        aria-label="Foto anterior"
+        class="lightbox-nav prev hidden"
+        onclick="
+          event.stopPropagation();
+          navegarLightbox(-1);
+        "
+      >
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <img
+        id="lightboxImg"
+        src=""
+        alt="Visualização da foto"
+        onclick="event.stopPropagation()"
+      />
+      <button
+        id="lightboxNext"
+        aria-label="Próxima foto"
+        class="lightbox-nav next hidden"
+        onclick="
+          event.stopPropagation();
+          navegarLightbox(1);
+        "
+      >
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+      <div id="lightboxCounter" class="lightbox-counter hidden">1 / 1</div>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,56 @@
+Caminho da pasta: C:\Users\Dilson\Documents\GitHub\AppCadastro 
+Listagem de caminhos de pasta para o volume Acer
+O número de série do volume é 22FF-8A69
+C:.
+|   .gitattributes
+|   gerar_lista.bat
+|   index.html
+|   lista_arquivos.txt
+|   
++---css
+|       styles.css
+|       
++---js
+|       app.js
+|       camera.js
+|       database.js
+|       dropdownCustom.js
+|       supabase.js
+|       
+\---os_painel
+    |   index.html
+    |   
+    +---assets
+    |       logo.png
+    |       logo1.png
+    |       
+    +---css
+    |       e.maxDepthhl,this.forceChown=e.forc.txt
+    |       style.css
+    |       
+    \---js
+        |   api.js
+        |   catalogoStore.js
+        |   compartilhamento.js
+        |   config.js
+        |   main.js
+        |   state.js
+        |   ui.js
+        |   utils.js
+        |   
+        \---views
+                acoes.js
+                dashboard.js
+                dropdownCustom.js
+                estados.js
+                faturamento.js
+                galeria.js
+                helpers.js
+                lightbox.js
+                listaOS.js
+                modalAdicionarItem.js
+                modalCatalogo.js
+                modalEditarOS.js
+                relatorio.js
+                sidebar.js
+                
