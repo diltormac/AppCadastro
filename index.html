@@ -69,6 +69,61 @@
       </div>
     </div>
 
+    <!-- MODAL DE CADASTRO DE DOCUMENTO (CPF / CNPJ) -->
+    <div id="modalDocumento" class="modal-custom" style="z-index: 1700">
+      <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <span><i class="fa-solid fa-id-card text-indigo-600 mr-1"></i> Documento do Cliente</span>
+          <button
+            id="btnFecharModalDocumento"
+            style="
+              background: none;
+              border: none;
+              font-size: 20px;
+              color: #94a3b8;
+            "
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div
+          style="
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+          "
+        >
+          <div>
+            <label class="field-label">CPF ou CNPJ (Opcional)</label>
+            <input
+              type="text"
+              id="inputDocumentoCliente"
+              class="field"
+              placeholder="Digite o CPF ou CNPJ"
+              maxlength="18"
+              autocomplete="off"
+            />
+          </div>
+        </div>
+        <div
+          style="
+            padding: 16px;
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+          "
+        >
+          <button
+            id="btnSalvarDocumento"
+            class="submit-button"
+            style="height: 44px; font-size: 14px"
+          >
+            <i class="fa-solid fa-check"></i> Salvar Documento
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- MODAL DE ADICIONAR SERVIÇO -->
     <div id="modalAdicionarServico" class="modal-custom" style="z-index: 1600">
       <div class="modal-box" onclick="event.stopPropagation()">
@@ -103,7 +158,7 @@
               >Serviço <span class="req">*</span></label
             >
 
-            <!-- ===== Dropdown customizado ===== -->
+            <!-- ===== Dropdown customizado (substitui <select> + botão do APK) ===== -->
             <div id="modalSelectServico"></div>
           </div>
 
@@ -121,7 +176,7 @@
             />
           </div>
 
-          <!-- Grupo de Placa (Alinhamento/Camber/Caster) -->
+          <!-- NOVO Grupo de Placa (Alinhamento/Camber/Caster) -->
           <div id="modalGrupoPlaca" class="hidden">
             <label class="field-label"
               >Placa do Veículo <span class="req">*</span></label
@@ -196,7 +251,7 @@
       </div>
     </div>
 
-    <!-- MODAL DE PLACA OPCIONAL -->
+    <!-- NOVO MODAL DE PLACA OPCIONAL -->
     <div id="modalPlacaOpcional" class="modal-custom" style="z-index: 1600">
       <div class="modal-box" onclick="event.stopPropagation()">
         <div class="modal-header">
@@ -452,41 +507,6 @@
       </div>
     </div>
 
-    <!-- MODAL DE DOCUMENTO CPF/CNPJ -->
-    <div id="modalDocumento" class="modal-custom" style="z-index: 1600; display: none;">
-      <div class="modal-box" onclick="event.stopPropagation()">
-        <div class="modal-header">
-          <span><i class="fa-solid fa-id-card text-indigo-600 mr-1"></i> Cadastro de Documento</span>
-          <button id="btnFecharModalDocumento" style="background: none; border: none; font-size: 20px; color: #94a3b8;">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-
-        <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px;">
-          <div>
-            <label for="inputDocumentoModal" class="field-label">
-              CPF ou CNPJ <span class="req">*</span>
-            </label>
-            <input
-              type="text"
-              id="inputDocumentoModal"
-              class="field"
-              placeholder="Digite CPF ou CNPJ"
-              inputmode="numeric"
-              autocomplete="off"
-            />
-            <p id="tipoDocumentoLabel" style="font-size: 11px; color: #64748b; margin-top: 6px; min-height: 14px;"></p>
-          </div>
-        </div>
-
-        <div style="padding: 16px; border-top: 1px solid #e2e8f0; background: #f8fafc;">
-          <button id="btnSalvarDocumento" class="submit-button" style="height: 44px; font-size: 14px">
-            <i class="fa-solid fa-check"></i> Salvar Documento
-          </button>
-        </div>
-      </div>
-    </div>
-
     <!-- CONTEÚDO PRINCIPAL -->
     <div class="app">
       <header class="app-header">
@@ -529,11 +549,22 @@
       <main class="app-main">
         <form id="osForm" class="flex min-h-0 flex-1 flex-col gap-2" novalidate>
           <section class="form-card" id="cardCliente">
-            <div class="mb-2 flex items-center gap-2">
-              <i class="fa-solid fa-user text-xs text-indigo-600"></i>
-              <h2 class="text-sm font-bold text-slate-800">Dados do cliente</h2>
-              <span class="field-hint" id="hintCliente">1 de 3</span>
+            <div class="mb-2 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-user text-xs text-indigo-600"></i>
+                <h2 class="text-sm font-bold text-slate-800">Dados do cliente</h2>
+              </div>
+              <!-- Botão discreto e visível para abrir o modal de documento -->
+              <button
+                type="button"
+                id="btnAbrirModalDocumento"
+                class="flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 px-2 py-1 rounded-md transition-colors"
+              >
+                <i class="fa-solid fa-id-card text-[10px]"></i>
+                <span id="labelBtnDocumento">CPF/CNPJ</span>
+              </button>
             </div>
+            
             <div class="mb-3">
               <label for="nome" class="field-label"
                 >Nome do cliente (Opcional)</label
@@ -581,24 +612,6 @@
                     style="display: none"
                   ></i>
                 </div>
-              </div>
-            </div>
-
-            <!-- Campo de Documento Discreto -->
-            <div class="mt-3">
-              <label for="documento" class="field-label">Documento (Opcional)</label>
-              <div class="field-wrap">
-                <i class="fa-solid fa-id-card field-icon"></i>
-                <input
-                  type="text"
-                  id="documento"
-                  name="documento"
-                  class="field cursor-pointer"
-                  placeholder="Adicionar CPF ou CNPJ"
-                  readonly
-                />
-                <input type="hidden" id="tipoDocumento" name="tipoDocumento" />
-                <i class="fa-solid fa-chevron-right field-status" style="color: #94a3b8; font-size: 10px;"></i>
               </div>
             </div>
           </section>
@@ -708,148 +721,6 @@
         }
       })();
     </script>
-
-    <!-- Lógica do Modal de Documento CPF/CNPJ -->
-    <script>
-      (function initDocumento() {
-        document.addEventListener("DOMContentLoaded", function () {
-          const campoVisivel = document.getElementById("documento");
-          const modal        = document.getElementById("modalDocumento");
-          const btnFechar    = document.getElementById("btnFecharModalDocumento");
-          const btnSalvar    = document.getElementById("btnSalvarDocumento");
-          const inputModal   = document.getElementById("inputDocumentoModal");
-          const hiddenTipo   = document.getElementById("tipoDocumento");
-          const tipoLabel    = document.getElementById("tipoDocumentoLabel");
-
-          if (!campoVisivel || !modal) return;
-
-          // ---------- MÁSCARAS ----------
-          function formatCPF(v) {
-            const d = v.replace(/\D/g, "").slice(0, 11);
-            let out = d;
-            if (d.length > 3) out = d.slice(0, 3) + "." + d.slice(3);
-            if (d.length > 6) out = d.slice(0, 3) + "." + d.slice(3, 6) + "." + d.slice(6);
-            if (d.length > 9) out = d.slice(0, 3) + "." + d.slice(3, 6) + "." + d.slice(6, 9) + "-" + d.slice(9);
-            return { formatted: out, digits: d, tipo: "CPF" };
-          }
-
-          function formatCNPJ(v) {
-            const d = v.replace(/\D/g, "").slice(0, 14);
-            let out = d;
-            if (d.length > 2)  out = d.slice(0, 2) + "." + d.slice(2);
-            if (d.length > 5)  out = d.slice(0, 2) + "." + d.slice(2, 5) + "." + d.slice(5);
-            if (d.length > 8)  out = d.slice(0, 2) + "." + d.slice(2, 5) + "." + d.slice(5, 8) + "/" + d.slice(8);
-            if (d.length > 12) out = d.slice(0, 2) + "." + d.slice(2, 5) + "." + d.slice(5, 8) + "/" + d.slice(8, 12) + "-" + d.slice(12);
-            return { formatted: out, digits: d, tipo: "CNPJ" };
-          }
-
-          function applyMask(v) {
-            const d = v.replace(/\D/g, "");
-            return d.length <= 11 ? formatCPF(v) : formatCNPJ(v);
-          }
-
-          // ---------- VALIDAÇÃO ----------
-          function validarCPF(cpf) {
-            cpf = cpf.replace(/\D/g, "");
-            if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
-            let s = 0;
-            for (let i = 0; i < 9; i++) s += +cpf[i] * (10 - i);
-            let r = (s * 10) % 11;
-            if (r === 10) r = 0;
-            if (r !== +cpf[9]) return false;
-            s = 0;
-            for (let i = 0; i < 10; i++) s += +cpf[i] * (11 - i);
-            r = (s * 10) % 11;
-            if (r === 10) r = 0;
-            return r === +cpf[10];
-          }
-
-          function validarCNPJ(cnpj) {
-            cnpj = cnpj.replace(/\D/g, "");
-            if (cnpj.length !== 14 || /^(\d)\1{13}$/.test(cnpj)) return false;
-            const calc = (base, pesos) => base.split("").reduce((acc, n, i) => acc + +n * pesos[i], 0);
-            const resto = (s) => (s % 11 < 2 ? 0 : 11 - (s % 11));
-            const d1 = resto(calc(cnpj.slice(0, 12), [5,4,3,2,9,8,7,6,5,4,3,2]));
-            const d2 = resto(calc(cnpj.slice(0, 13), [6,5,4,3,2,9,8,7,6,5,4,3,2]));
-            return d1 === +cnpj[12] && d2 === +cnpj[13];
-          }
-
-          // ---------- UI ----------
-          function atualizarLabel() {
-            const d = inputModal.value.replace(/\D/g, "");
-            if (!d) { tipoLabel.textContent = ""; return; }
-            if (d.length <= 11) {
-              tipoLabel.textContent = "Detectado: CPF (" + d.length + "/11)";
-              tipoLabel.style.color = d.length === 11 ? "#059669" : "#64748b";
-            } else {
-              tipoLabel.textContent = "Detectado: CNPJ (" + d.length + "/14)";
-              tipoLabel.style.color = d.length === 14 ? "#059669" : "#64748b";
-            }
-          }
-
-          function abrirModal() {
-            inputModal.value = campoVisivel.value || "";
-            atualizarLabel();
-            modal.style.display = "flex";
-            setTimeout(() => inputModal.focus(), 100);
-          }
-
-          function fecharModal() {
-            modal.style.display = "none";
-          }
-
-          // ---------- EVENTOS ----------
-          campoVisivel.addEventListener("click", abrirModal);
-          
-          btnFechar.addEventListener("click", fecharModal);
-          
-          modal.addEventListener("click", (e) => {
-            if (e.target === modal) fecharModal();
-          });
-
-          inputModal.addEventListener("input", (e) => {
-            const r = applyMask(e.target.value);
-            e.target.value = r.formatted;
-            atualizarLabel();
-            const len = e.target.value.length;
-            e.target.setSelectionRange(len, len);
-          });
-
-          btnSalvar.addEventListener("click", () => {
-            const digits = inputModal.value.replace(/\D/g, "");
-            if (!digits) {
-              campoVisivel.value = "";
-              hiddenTipo.value = "";
-              fecharModal();
-              return;
-            }
-            if (digits.length !== 11 && digits.length !== 14) {
-              alert("Documento incompleto. CPF tem 11 dígitos, CNPJ tem 14.");
-              return;
-            }
-
-            let tipo = digits.length === 11 ? "CPF" : "CNPJ";
-            let valido = tipo === "CPF" ? validarCPF(digits) : validarCNPJ(digits);
-
-            if (!valido) {
-              const ok = confirm(tipo + " inválido. Deseja salvar mesmo assim?");
-              if (!ok) return;
-            }
-
-            // Salva no campo visível e no hidden
-            campoVisivel.value = inputModal.value;
-            hiddenTipo.value = tipo;
-
-            // Muda a cor do texto para destacar que foi preenchido
-            campoVisivel.style.color = "#fff";
-            campoVisivel.style.fontWeight = "600";
-
-            fecharModal();
-          });
-        });
-      })();
-    </script>
-
     <script type="module" src="./js/app.js"></script>
   </body>
 </html>
