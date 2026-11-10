@@ -69,6 +69,61 @@
       </div>
     </div>
 
+    <!-- MODAL DE CADASTRO DE DOCUMENTO (CPF / CNPJ) -->
+    <div id="modalDocumento" class="modal-custom" style="z-index: 1700">
+      <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <span><i class="fa-solid fa-id-card text-indigo-600 mr-1"></i> Documento do Cliente</span>
+          <button
+            id="btnFecharModalDocumento"
+            style="
+              background: none;
+              border: none;
+              font-size: 20px;
+              color: #94a3b8;
+            "
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div
+          style="
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+          "
+        >
+          <div>
+            <label class="field-label">CPF ou CNPJ (Opcional)</label>
+            <input
+              type="text"
+              id="inputDocumentoCliente"
+              class="field"
+              placeholder="Digite o CPF ou CNPJ"
+              maxlength="18"
+              autocomplete="off"
+            />
+          </div>
+        </div>
+        <div
+          style="
+            padding: 16px;
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+          "
+        >
+          <button
+            id="btnSalvarDocumento"
+            class="submit-button"
+            style="height: 44px; font-size: 14px"
+          >
+            <i class="fa-solid fa-check"></i> Salvar Documento
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- MODAL DE ADICIONAR SERVIÇO -->
     <div id="modalAdicionarServico" class="modal-custom" style="z-index: 1600">
       <div class="modal-box" onclick="event.stopPropagation()">
@@ -249,100 +304,6 @@
             style="height: 44px; font-size: 14px"
           >
             <i class="fa-solid fa-check"></i> Salvar Placa
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ============================================================ -->
-    <!-- NOVO MODAL: CPF / CNPJ                                       -->
-    <!-- ============================================================ -->
-    <div id="modalDocumento" class="modal-custom" style="z-index: 1600; display: none">
-      <div class="modal-box" onclick="event.stopPropagation()">
-        <div class="modal-header">
-          <span
-            ><i class="fa-solid fa-id-card text-indigo-600 mr-1"></i>
-            CPF / CNPJ</span
-          >
-          <button
-            id="btnFecharModalDocumento"
-            style="
-              background: none;
-              border: none;
-              font-size: 20px;
-              color: #94a3b8;
-            "
-          >
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-        <div
-          style="
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-          "
-        >
-          <div>
-            <label class="field-label" for="inputDocumento"
-              >Documento (CPF ou CNPJ)</label
-            >
-            <input
-              type="text"
-              id="inputDocumento"
-              class="field"
-              placeholder="000.000.000-00 ou 00.000.000/0000-00"
-              maxlength="18"
-              inputmode="numeric"
-              autocomplete="off"
-            />
-            <p
-              style="
-                font-size: 11px;
-                color: #64748b;
-                margin-top: 6px;
-                display: flex;
-                align-items: center;
-                gap: 4px;
-              "
-            >
-              <i class="fa-solid fa-circle-info text-indigo-400"></i>
-              Digite apenas os números. O formato é aplicado automaticamente.
-            </p>
-          </div>
-        </div>
-        <div
-          style="
-            padding: 16px;
-            border-top: 1px solid #e2e8f0;
-            background: #f8fafc;
-            display: flex;
-            gap: 8px;
-          "
-        >
-          <button
-            id="btnRemoverDocumento"
-            type="button"
-            style="
-              height: 44px;
-              font-size: 13px;
-              padding: 0 14px;
-              background: #fff;
-              color: #dc2626;
-              border: 1px solid #fecaca;
-              border-radius: 10px;
-              font-weight: 600;
-            "
-          >
-            <i class="fa-solid fa-trash"></i> Limpar
-          </button>
-          <button
-            id="btnSalvarDocumento"
-            class="submit-button"
-            style="height: 44px; font-size: 14px; flex: 1"
-          >
-            <i class="fa-solid fa-check"></i> Salvar Documento
           </button>
         </div>
       </div>
@@ -588,31 +549,22 @@
       <main class="app-main">
         <form id="osForm" class="flex min-h-0 flex-1 flex-col gap-2" novalidate>
           <section class="form-card" id="cardCliente">
-            <div class="mb-2 flex items-center gap-2">
-              <i class="fa-solid fa-user text-xs text-indigo-600"></i>
-              <h2 class="text-sm font-bold text-slate-800">Dados do cliente</h2>
-              <span class="field-hint" id="hintCliente">1 de 3</span>
-
-              <!-- ================================================ -->
-              <!-- BOTÃO DISCRETO PARA ABRIR MODAL DE CPF / CNPJ   -->
-              <!-- ================================================ -->
+            <div class="mb-2 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-user text-xs text-indigo-600"></i>
+                <h2 class="text-sm font-bold text-slate-800">Dados do cliente</h2>
+              </div>
+              <!-- Botão discreto e visível para abrir o modal de documento -->
               <button
                 type="button"
-                id="btnAbrirDocumento"
-                class="ml-auto inline-flex items-center gap-1 rounded-md border border-slate-300 bg-slate-50 px-2 py-1 text-[10px] font-semibold text-slate-600 hover:bg-slate-100 active:scale-95 transition-all"
-                title="Cadastrar CPF / CNPJ"
+                id="btnAbrirModalDocumento"
+                class="flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 px-2 py-1 rounded-md transition-colors"
               >
-                <i
-                  class="fa-regular fa-id-card text-[10px]"
-                  id="iconDocumento"
-                ></i>
-                <span id="labelDocumento">CPF/CNPJ</span>
+                <i class="fa-solid fa-id-card text-[10px]"></i>
+                <span id="labelBtnDocumento">CPF/CNPJ</span>
               </button>
             </div>
-
-            <!-- Hidden input que guarda o documento e vai junto no envio -->
-            <input type="hidden" id="documento" name="documento" />
-
+            
             <div class="mb-3">
               <label for="nome" class="field-label"
                 >Nome do cliente (Opcional)</label
@@ -769,182 +721,6 @@
         }
       })();
     </script>
-
-    <!-- ============================================================
-         SCRIPT: MÓDULO CPF / CNPJ
-         ============================================================ -->
-    <script>
-      (function () {
-        const modalDoc = document.getElementById("modalDocumento");
-        const btnAbrir = document.getElementById("btnAbrirDocumento");
-        const btnFechar = document.getElementById("btnFecharModalDocumento");
-        const btnSalvar = document.getElementById("btnSalvarDocumento");
-        const btnRemover = document.getElementById("btnRemoverDocumento");
-        const inputDoc = document.getElementById("inputDocumento");
-        const hiddenDoc = document.getElementById("documento");
-        const labelDoc = document.getElementById("labelDocumento");
-        const iconDoc = document.getElementById("iconDocumento");
-
-        if (!modalDoc || !btnAbrir) return;
-
-        /* ---------- Máscara automática CPF / CNPJ ---------- */
-        function formatarDocumento(valor) {
-          const d = valor.replace(/\D/g, "").slice(0, 14);
-
-          if (d.length <= 11) {
-            // CPF: 000.000.000-00
-            if (d.length <= 3) return d;
-            if (d.length <= 6) return d.slice(0, 3) + "." + d.slice(3);
-            if (d.length <= 9)
-              return d.slice(0, 3) + "." + d.slice(3, 6) + "." + d.slice(6);
-            return (
-              d.slice(0, 3) +
-              "." +
-              d.slice(3, 6) +
-              "." +
-              d.slice(6, 9) +
-              "-" +
-              d.slice(9)
-            );
-          }
-
-          // CNPJ: 00.000.000/0000-00
-          if (d.length <= 2) return d;
-          if (d.length <= 5) return d.slice(0, 2) + "." + d.slice(2);
-          if (d.length <= 8)
-            return d.slice(0, 2) + "." + d.slice(2, 5) + "." + d.slice(5);
-          if (d.length <= 12)
-            return (
-              d.slice(0, 2) +
-              "." +
-              d.slice(2, 5) +
-              "." +
-              d.slice(5, 8) +
-              "/" +
-              d.slice(8)
-            );
-          return (
-            d.slice(0, 2) +
-            "." +
-            d.slice(2, 5) +
-            "." +
-            d.slice(5, 8) +
-            "/" +
-            d.slice(8, 12) +
-            "-" +
-            d.slice(12)
-          );
-        }
-
-        /* ---------- Atualiza o estado visual do botão ---------- */
-        function atualizarBotao() {
-          const val = hiddenDoc.value;
-          if (val) {
-            // Estado "preenchido" (verde discreto)
-            btnAbrir.classList.remove(
-              "border-slate-300",
-              "bg-slate-50",
-              "text-slate-600",
-              "hover:bg-slate-100"
-            );
-            btnAbrir.classList.add(
-              "border-emerald-300",
-              "bg-emerald-50",
-              "text-emerald-700",
-              "hover:bg-emerald-100"
-            );
-            iconDoc.className = "fa-solid fa-circle-check text-[10px]";
-            // Mostra valor formatado (curto)
-            const curto =
-              val.length > 15 ? val.slice(0, 15) + "…" : val;
-            labelDoc.textContent = curto;
-            labelDoc.title = val;
-          } else {
-            // Estado "vazio" (neutro discreto)
-            btnAbrir.classList.remove(
-              "border-emerald-300",
-              "bg-emerald-50",
-              "text-emerald-700",
-              "hover:bg-emerald-100"
-            );
-            btnAbrir.classList.add(
-              "border-slate-300",
-              "bg-slate-50",
-              "text-slate-600",
-              "hover:bg-slate-100"
-            );
-            iconDoc.className = "fa-regular fa-id-card text-[10px]";
-            labelDoc.textContent = "CPF/CNPJ";
-            labelDoc.title = "";
-          }
-        }
-
-        /* ---------- Abrir modal ---------- */
-        btnAbrir.addEventListener("click", () => {
-          inputDoc.value = hiddenDoc.value || "";
-          modalDoc.style.display = "flex";
-          setTimeout(() => {
-            inputDoc.focus();
-            inputDoc.setSelectionRange(
-              inputDoc.value.length,
-              inputDoc.value.length
-            );
-          }, 120);
-        });
-
-        /* ---------- Fechar modal (X) ---------- */
-        btnFechar.addEventListener("click", () => {
-          modalDoc.style.display = "none";
-        });
-
-        /* ---------- Fechar clicando fora ---------- */
-        modalDoc.addEventListener("click", (e) => {
-          if (e.target === modalDoc) modalDoc.style.display = "none";
-        });
-
-        /* ---------- Máscara em tempo real ---------- */
-        inputDoc.addEventListener("input", (e) => {
-          e.target.value = formatarDocumento(e.target.value);
-        });
-
-        /* ---------- Salvar ---------- */
-        btnSalvar.addEventListener("click", () => {
-          const formatado = inputDoc.value.trim();
-          const digitos = formatado.replace(/\D/g, "");
-
-          if (digitos.length === 0) {
-            // Campo vazio = limpar
-            hiddenDoc.value = "";
-            atualizarBotao();
-            modalDoc.style.display = "none";
-            return;
-          }
-
-          if (digitos.length !== 11 && digitos.length !== 14) {
-            alert(
-              "Documento inválido.\n• CPF deve ter 11 dígitos.\n• CNPJ deve ter 14 dígitos."
-            );
-            return;
-          }
-
-          hiddenDoc.value = formatado;
-          atualizarBotao();
-          modalDoc.style.display = "none";
-        });
-
-        /* ---------- Limpar / remover ---------- */
-        btnRemover.addEventListener("click", () => {
-          hiddenDoc.value = "";
-          inputDoc.value = "";
-          atualizarBotao();
-          modalDoc.style.display = "none";
-        });
-
-        /* ---------- Estado inicial ---------- */
-        atualizarBotao();
-      })();
-    </script>
-
     <script type="module" src="./js/app.js"></script>
   </body>
 </html>
