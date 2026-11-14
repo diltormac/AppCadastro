@@ -112,7 +112,6 @@ async function executarConsulta(consulta) {
   return sinal ? consulta.abortSignal(sinal) : consulta;
 }
 
-// FUNÇÃO NOVA: Filtra os dados localmente quando estiver offline
 function filtrarLocalmente(listaOriginal) {
   let filtrada = [...listaOriginal];
   
@@ -192,13 +191,11 @@ export async function carregarDados() {
     estado.carregamento = "ok";
     estado.mensagemErro = "";
 
-    // Salva no Dexie (limpa a página 0 antiga para não duplicar e insere a nova)
     await db.ordens_servico.clear();
     await db.ordens_servico.bulkPut(norm);
 
   } catch (error) {
     console.warn("Erro online, buscando no Dexie...", error);
-    // FALLBACK OFFLINE
     const locais = await db.ordens_servico.toArray();
     if (locais.length > 0) {
       setListaOS(filtrarLocalmente(locais));
@@ -222,7 +219,6 @@ export async function carregarDados() {
 }
 
 export async function recarregarListaOS() {
-  // Redireciona para carregarDados que já tem a inteligência offline
   return carregarDados();
 }
 
@@ -247,7 +243,6 @@ export async function carregarMaisOS() {
     setPaginaOS(proximaPagina);
     setTemMaisOS(novos.length === TAMANHO_PAGINA_OS);
 
-    // Adiciona ao Dexie sem limpar os anteriores
     await db.ordens_servico.bulkPut(novos);
 
   } catch (error) {
@@ -279,7 +274,6 @@ export async function carregarResumoDashboard() {
     setDashboardCarregamento("ok");
     setDashboardMensagemErro("");
 
-    // Salva no Dexie
     await db.resumo_dashboard.put({ id: 1, ...resumo });
 
   } catch (error) {
@@ -310,13 +304,15 @@ export async function carregarUltimasOS() {
     const ultimas = (data || []).map(normalizarOS);
     setUltimasOS(ultimas);
 
-    // Salva no Dexie
     await db.ordens_servico.bulkPut(ultimas);
 
   } catch (error) {
     console.warn("Erro nas últimas OS online. Tentando Dexie...", error);
-    // Pega as 10 mais recentes do banco local
-    const locais = await db.ordens_servico.reverse().sortBy("created_at");
+    
+    // AQUI ESTÁ A CORREÇÃO DO ERRO:
+    const locais = await db.ordens_servico.toArray();
+    locais.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    
     setUltimasOS(locais.slice(0, 10));
   } finally {
     const { renderDashboard } = await import("./ui.js");
@@ -356,7 +352,7 @@ export async function carregarGaleria() {
 
 export async function carregarMaisGaleria() {
   if (!supabaseClient) return;
-  if (!navigator.onLine) return; // Não carrega mais fotos offline
+  if (!navigator.onLine) return; 
   setCarregandoMaisGaleria(true);
   const { renderGaleria } = await import("./ui.js");
   renderGaleria();
@@ -498,7 +494,6 @@ export async function salvarEdicoes(id) {
     Object.assign(osAtual, dadosAtualizacao);
     setItensRascunho(itensAtualizados);
     
-    // Atualiza no Dexie
     await db.ordens_servico.update(id, dadosAtualizacao);
 
     toast("OS atualizada com sucesso!");
@@ -510,15 +505,11 @@ export async function salvarEdicoes(id) {
     
   } catch (error) {
     console.warn(error);
-    // SALVAMENTO OFFLINE
     if (!navigator.onLine || /fetch|network/i.test(String(error))) {
       Object.assign(osAtual, dadosAtualizacao);
       setItensRascunho(itensAtualizados);
       
-      // Salva no Dexie
       await db.ordens_servico.update(id, dadosAtualizacao);
-      
-      // Coloca na fila
       await db.sync_queue.add({ osId: id, tipo: "UPDATE", dados: dadosAtualizacao });
       
       toast("Você está offline. As alterações foram salvas e serão sincronizadas quando a internet voltar.", "success");
@@ -591,7 +582,7 @@ export async function excluirOS(id) {
     }
     
     setListaOS(listaOS.filter((o) => o.id !== id));
-    await db.ordens_servico.delete(id); // Apaga do Dexie também
+    await db.ordens_servico.delete(id);
     
     toast("OS excluída com sucesso!");
     const { fecharModal } = await import("./ui.js");
