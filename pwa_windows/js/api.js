@@ -36,6 +36,7 @@ import {
   confirmarAcao,
 } from "./utils.js";
 
+
 let carregando = false;
 
 function normalizarOS(item) {
