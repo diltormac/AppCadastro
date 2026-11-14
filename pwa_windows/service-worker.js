@@ -7,7 +7,7 @@
    - Navegação (HTML) → network-first com fallback cache → offline.html
    ========================================================= */
 
-const VERSAO = "v3";
+const VERSAO = "v2";
 const CACHE_SHELL = `osfacil-shell-${VERSAO}`;
 const CACHE_CDN = `osfacil-cdn-${VERSAO}`;
 const CACHE_API = `osfacil-api-${VERSAO}`;
