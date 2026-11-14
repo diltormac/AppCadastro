@@ -46,7 +46,8 @@ if (navigator.userAgent.includes("Electron")) {
   document.body.classList.add("is-electron");
 }
 
-/* ---------- NAVEGAÇÃO ---------- */
+
+/* ---------- NAVEGAÇÃO ---------- */o
 function mudarView(view) {
   estado.view = view;
   document.querySelectorAll(".sidebar-link[data-view]").forEach((el) => el.classList.remove("active"));
