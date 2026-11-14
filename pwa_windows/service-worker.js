@@ -7,7 +7,7 @@
    - Navegação (HTML) → network-first com fallback cache → offline.html
    ========================================================= */
 
-const VERSAO = "v1";
+const VERSAO = "v3";
 const CACHE_SHELL = `osfacil-shell-${VERSAO}`;
 const CACHE_CDN = `osfacil-cdn-${VERSAO}`;
 const CACHE_API = `osfacil-api-${VERSAO}`;
@@ -26,6 +26,7 @@ const ASSETS_SHELL = [
   "./js/registrar-sw.js",
   "./js/main.js",
   "./js/api.js",
+  "./js/db.js",
   "./js/state.js",
   "./js/ui.js",
   "./js/utils.js",
