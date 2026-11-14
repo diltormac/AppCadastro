@@ -38,6 +38,8 @@ import { setTouchStartX, setTouchEndX, exibirFaturamento } from "./state.js";
 import { toast } from "./utils.js";
 import { criarDropdownCustom } from "./views/dropdownCustom.js";
 import { obterCatalogoServicos } from "./catalogoStore.js";
+import { db } from "./db.js";
+import { supabaseClient } from "./config.js";
 
 /* ---------- DETECÇÃO DE ELECTRON ---------- */
 if (navigator.userAgent.includes("Electron")) {
@@ -47,12 +49,8 @@ if (navigator.userAgent.includes("Electron")) {
 /* ---------- NAVEGAÇÃO ---------- */
 function mudarView(view) {
   estado.view = view;
-  document
-    .querySelectorAll(".sidebar-link[data-view]")
-    .forEach((el) => el.classList.remove("active"));
-  const activeLink = document.querySelector(
-    `.sidebar-link[data-view="${view}"]`,
-  );
+  document.querySelectorAll(".sidebar-link[data-view]").forEach((el) => el.classList.remove("active"));
+  const activeLink = document.querySelector(`.sidebar-link[data-view="${view}"]`);
   if (activeLink) activeLink.classList.add("active");
 
   document.getElementById("viewDashboard").classList.add("hidden");
@@ -62,18 +60,15 @@ function mudarView(view) {
   if (view === "dashboard") {
     document.getElementById("viewDashboard").classList.remove("hidden");
     document.getElementById("pageTitle").textContent = "Dashboard";
-    document.getElementById("pageSubtitle").textContent =
-      "Visão geral das ordens de serviço";
+    document.getElementById("pageSubtitle").textContent = "Visão geral das ordens de serviço";
   } else if (view === "os") {
     document.getElementById("viewOS").classList.remove("hidden");
     document.getElementById("pageTitle").textContent = "Todas as OS";
-    document.getElementById("pageSubtitle").textContent =
-      "Gerencie as ordens de serviço";
+    document.getElementById("pageSubtitle").textContent = "Gerencie as ordens de serviço";
   } else if (view === "fotos") {
     document.getElementById("viewFotos").classList.remove("hidden");
     document.getElementById("pageTitle").textContent = "Galeria de Fotos";
-    document.getElementById("pageSubtitle").textContent =
-      "Todas as imagens enviadas";
+    document.getElementById("pageSubtitle").textContent = "Todas as imagens enviadas";
   }
 
   fecharSidebar();
@@ -81,14 +76,9 @@ function mudarView(view) {
 
 /* ---------- FUNÇÃO PARA FILTRAR PELO CLIQUE NOS CARDS ---------- */
 window.filtrarPorCard = function (filtro) {
-  // Reseta filtros anteriores
   estado.filtroStatus = "all";
   estado.filtroFinalizado = "all";
-
-  // Reseta visual dos botões de filtro
-  document
-    .querySelectorAll(".filter-btn")
-    .forEach((b) => b.classList.remove("active"));
+  document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
 
   if (filtro === "prontas") {
     estado.filtroFinalizado = "prontas";
@@ -96,57 +86,29 @@ window.filtrarPorCard = function (filtro) {
     if (btnTodas) btnTodas.classList.add("active");
   } else {
     estado.filtroStatus = filtro;
-    const btnMatch = document.querySelector(
-      `.filter-btn[data-status="${filtro}"]`,
-    );
+    const btnMatch = document.querySelector(`.filter-btn[data-status="${filtro}"]`);
     if (btnMatch) btnMatch.classList.add("active");
   }
 
-  // Vai para a tela de OS e recarrega
   mudarView("os");
   recarregarListaOS();
 };
 
 /* ---------- EXPÕE FUNÇÕES USADAS EM onclick DO HTML ---------- */
 Object.assign(window, {
-  alternarFaturamento,
-  abrirSidebar,
-  fecharSidebar,
-  abrirLightboxPorOS,
-  navegarLightbox,
-  fecharLightbox,
-  abrirDetalhes,
-  fecharModal,
-  compartilharOS,
-  modalAdicionarItem,
-  modalRemoverItem,
-  modalEditarItem,
-  modalGerenciarCatalogo,
-  modalEditarServicoCatalogo,
-  adicionarServicoCatalogo,
-  removerServicoCatalogo,
-  copiarCampo,
-  salvarEdicoes,
-  excluirOS,
-  carregarDados,
-  carregarMaisOS,
-  carregarMaisGaleria,
-  mudarView,
-  adicionarFotosOS,
-  excluirFotoOS,
+  alternarFaturamento, abrirSidebar, fecharSidebar, abrirLightboxPorOS, navegarLightbox,
+  fecharLightbox, abrirDetalhes, fecharModal, compartilharOS, modalAdicionarItem,
+  modalRemoverItem, modalEditarItem, modalGerenciarCatalogo, modalEditarServicoCatalogo,
+  adicionarServicoCatalogo, removerServicoCatalogo, copiarCampo, salvarEdicoes, excluirOS,
+  carregarDados, carregarMaisOS, carregarMaisGaleria, mudarView, adicionarFotosOS, excluirFotoOS,
 });
 
 Object.assign(window, {
   abrirRelatorioOS: (id) => {
     import("./state.js").then(({ listaOS }) => {
       const os = listaOS.find((o) => o.id === id);
-      if (os) {
-        abrirRelatorio(os);
-      } else {
-        import("./utils.js").then(({ toast }) => {
-          toast("OS não encontrada.", "error");
-        });
-      }
+      if (os) abrirRelatorio(os);
+      else toast("OS não encontrada.", "error");
     });
   },
 });
@@ -162,13 +124,8 @@ document.querySelectorAll(".sidebar-link[data-filter]").forEach((el) => {
     estado.filtroStatus = statusFiltro;
     estado.filtroFinalizado = "all";
 
-    // Atualiza os botões da barra de filtros superior também
-    document
-      .querySelectorAll(".filter-btn")
-      .forEach((b) => b.classList.remove("active"));
-    const match = document.querySelector(
-      `.filter-btn[data-status="${statusFiltro}"]`,
-    );
+    document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
+    const match = document.querySelector(`.filter-btn[data-status="${statusFiltro}"]`);
     if (match) match.classList.add("active");
 
     mudarView("os");
@@ -178,9 +135,7 @@ document.querySelectorAll(".sidebar-link[data-filter]").forEach((el) => {
 
 document.querySelectorAll(".filter-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
-    document
-      .querySelectorAll(".filter-btn")
-      .forEach((b) => b.classList.remove("active"));
+    document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
     btn.classList.add("active");
     estado.filtroStatus = btn.dataset.status;
     estado.filtroFinalizado = "all";
@@ -241,22 +196,15 @@ if (inputDataInicial && inputDataFinal) {
       recarregarListaOS();
     },
   };
-
   flatpickr(inputDataInicial, configCalendario);
   flatpickr(inputDataFinal, configCalendario);
 }
 
 async function popularFiltroServicos() {
   if (!containerFiltroServico) return;
-
   try {
     const catalogo = await obterCatalogoServicos();
-
-    const options = [
-      { value: "all", text: "Todos os Serviços" },
-      ...catalogo.map((s) => ({ value: s.nome, text: s.nome })),
-    ];
-
+    const options = [{ value: "all", text: "Todos os Serviços" }, ...catalogo.map((s) => ({ value: s.nome, text: s.nome }))];
     const dropdownCustom = criarDropdownCustom({
       id: "filtroServicoSelect",
       name: "filtroServico",
@@ -264,9 +212,7 @@ async function popularFiltroServicos() {
       options: options,
       className: "h-[34px] text-xs",
     });
-
     containerFiltroServico.replaceWith(dropdownCustom);
-
     dropdownCustom.addEventListener("change", () => {
       estado.filtroServico = dropdownCustom.value;
       recarregarListaOS();
@@ -275,7 +221,6 @@ async function popularFiltroServicos() {
     console.error("Erro ao carregar serviços para o filtro", e);
   }
 }
-
 popularFiltroServicos();
 
 if (btnLimparDatas) {
@@ -283,15 +228,10 @@ if (btnLimparDatas) {
     estado.dataInicial = "";
     estado.dataFinal = "";
     estado.filtroServico = "all";
-
-    if (inputDataInicial && inputDataInicial._flatpickr)
-      inputDataInicial._flatpickr.clear();
-    if (inputDataFinal && inputDataFinal._flatpickr)
-      inputDataFinal._flatpickr.clear();
-
+    if (inputDataInicial && inputDataInicial._flatpickr) inputDataInicial._flatpickr.clear();
+    if (inputDataFinal && inputDataFinal._flatpickr) inputDataFinal._flatpickr.clear();
     const selectCustom = document.getElementById("filtroServicoSelect");
     if (selectCustom) selectCustom.value = "all";
-
     recarregarListaOS();
   });
 }
@@ -301,28 +241,20 @@ document.getElementById("modalDetalhes").addEventListener("click", (e) => {
   if (e.target.id === "modalDetalhes") fecharModal();
 });
 
-document.getElementById("lightbox").addEventListener(
-  "touchstart",
-  (e) => {
-    setTouchStartX(e.changedTouches[0].screenX);
-  },
-  { passive: true },
-);
+document.getElementById("lightbox").addEventListener("touchstart", (e) => {
+  setTouchStartX(e.changedTouches[0].screenX);
+}, { passive: true });
 
-document.getElementById("lightbox").addEventListener(
-  "touchend",
-  (e) => {
-    setTouchEndX(e.changedTouches[0].screenX);
-    import("./state.js").then(({ galeriaLightbox, touchStartX, touchEndX }) => {
-      if (galeriaLightbox.length > 1) {
-        const limite = 50;
-        if (touchEndX < touchStartX - limite) navegarLightbox(1);
-        if (touchEndX > touchStartX + limite) navegarLightbox(-1);
-      }
-    });
-  },
-  { passive: true },
-);
+document.getElementById("lightbox").addEventListener("touchend", (e) => {
+  setTouchEndX(e.changedTouches[0].screenX);
+  import("./state.js").then(({ galeriaLightbox, touchStartX, touchEndX }) => {
+    if (galeriaLightbox.length > 1) {
+      const limite = 50;
+      if (touchEndX < touchStartX - limite) navegarLightbox(1);
+      if (touchEndX > touchStartX + limite) navegarLightbox(-1);
+    }
+  });
+}, { passive: true });
 
 window.addEventListener("resize", () => {
   if (window.innerWidth >= 1024) fecharSidebar();
@@ -347,37 +279,60 @@ cardFaturamento?.addEventListener("keydown", (e) => {
   }
 });
 
-document.addEventListener(
-  "error",
-  (e) => {
+document.addEventListener("error", (e) => {
     const alvo = e.target;
     if (!(alvo instanceof HTMLImageElement)) return;
     if (alvo.classList.contains("os-foto")) tratarFotoQuebrada(alvo);
     if (alvo.id === "lightboxImg" && alvo.getAttribute("src")) {
-      toast(
-        "Esta foto não pôde ser carregada. Ela pode ter sido apagada.",
-        "error",
-      );
+      toast("Esta foto não pôde ser carregada. Ela pode ter sido apagada.", "error");
     }
-  },
-  true,
+  }, true
 );
 
 window.addEventListener("offline", () => {
-  toast(
-    "Sem conexão com a internet. As alterações não serão salvas até a rede voltar.",
-    "error",
-  );
+  toast("Sem conexão com a internet. O app está operando no modo offline.", "error");
 });
+
+/* =========================================================
+   SINCRONIZAÇÃO OFFLINE (DEXIE)
+   ========================================================= */
+async function sincronizarFilaOffline() {
+  if (!navigator.onLine || !supabaseClient) return;
+
+  const pendentes = await db.sync_queue.toArray();
+  if (pendentes.length === 0) return;
+
+  console.log(`Sincronizando ${pendentes.length} alterações pendentes...`);
+  toast(`Sincronizando ${pendentes.length} alteração(ões) feita(s) offline...`);
+
+  let sucessos = 0;
+
+  for (const item of pendentes) {
+    try {
+      if (item.tipo === "UPDATE") {
+        const { error } = await supabaseClient.from("ordens_servico").update(item.dados).eq("id", item.osId);
+        if (error) throw error;
+      }
+      await db.sync_queue.delete(item.id); // Remove da fila após sucesso
+      sucessos++;
+    } catch (err) {
+      console.error("Falha ao sincronizar item", item, err);
+    }
+  }
+
+  if (sucessos > 0) {
+    toast(`${sucessos} alteração(ões) sincronizada(s) com o servidor!`);
+    carregarDados(); // Recarrega os dados frescos do servidor
+  }
+}
+
 window.addEventListener("online", () => {
-  toast("Conexão restabelecida. Atualizando…");
-  carregarDados();
+  toast("Conexão restabelecida. Sincronizando…");
+  sincronizarFilaOffline();
 });
 
 if (exibirFaturamento) {
-  agendarBloqueioFaturamento(
-    Number(sessionStorage.getItem("@osfacil_faturamento")),
-  );
+  agendarBloqueioFaturamento(Number(sessionStorage.getItem("@osfacil_faturamento")));
 }
 
 window.addEventListener("osfacil_toast", (e) => {
