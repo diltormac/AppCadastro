@@ -4,753 +4,693 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover"
+      content="width=device-width, initial-scale=1.0, maximum-scale=5.0"
     />
-    <meta name="theme-color" content="#172033" />
-    <title>OS Fácil - Pré-Cadastro</title>
+    <title>OS Fácil — Painel de Ordens de Serviço</title>
+
+    <!-- ================= PWA ================= -->
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="application-name" content="OS Fácil" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="OS Fácil" />
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512.png" />
+    <link rel="apple-touch-icon" href="assets/icon-192.png" />
+    <!-- ======================================= -->
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./css/styles.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+    <style>
+      body.is-electron .esconder-no-electron {
+        display: none !important;
+      }
+    </style>
   </head>
-  <body>
+  <body class="bg-slate-100 h-screen overflow-hidden flex">
+    <!-- ============ OVERLAY (mobile) ============ -->
     <div
-      id="toast-container"
-      class="fixed top-4 left-0 right-0 z-50 flex flex-col items-center pointer-events-none px-4 max-w-[500px] mx-auto"
+      id="sidebarOverlay"
+      class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 hidden lg:hidden"
+      onclick="fecharSidebar()"
     ></div>
 
-    <!-- MODAL DE IDENTIFICAÇÃO DO APARELHO -->
-    <div id="modalIdentificacao" class="modal-custom" style="z-index: 2000">
-      <div class="modal-box">
-        <div class="modal-header">
-          <span>Identificação do Aparelho</span>
+    <!-- ================= SIDEBAR ================= -->
+    <aside
+      id="sidebar"
+      class="fixed lg:static inset-y-0 left-0 z-40 w-64 bg-slate-900 text-white flex flex-col flex-shrink-0 border-r border-slate-800 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-out"
+    >
+      <div class="px-5 py-5 border-b border-slate-800 flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center shadow-lg shadow-indigo-900/40 flex-shrink-0"
+        >
+          <i class="fa-solid fa-clipboard-list text-lg"></i>
         </div>
-        <div style="padding: 20px">
-          <p
-            style="
-              font-size: 13px;
-              color: #475569;
-              margin-bottom: 12px;
-              text-align: center;
-            "
-          >
-            Para começar, dê um nome a este aparelho (Ex: Tablet Recepção,
-            Celular João).
+        <div class="min-w-0">
+          <p class="font-extrabold text-base leading-none">OS Fácil</p>
+          <p class="text-[10px] text-slate-400 mt-1 tracking-wider uppercase">
+            Painel Admin
           </p>
-          <input
-            type="text"
-            id="inputNomeAparelho"
-            class="field"
-            placeholder="Digite o nome do aparelho"
-            style="text-align: center"
-          />
         </div>
-        <div
-          style="
-            padding: 16px;
-            border-top: 1px solid #e2e8f0;
-            background: #f8fafc;
-          "
+        <button
+          onclick="fecharSidebar()"
+          class="lg:hidden ml-auto w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center text-slate-400"
         >
-          <button
-            id="btnSalvarIdentificacao"
-            class="submit-button"
-            style="height: 44px; font-size: 14px"
-          >
-            Confirmar e Entrar
-          </button>
-        </div>
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
-    </div>
 
-    <!-- MODAL DE ADICIONAR SERVIÇO -->
-    <div id="modalAdicionarServico" class="modal-custom" style="z-index: 1600">
-      <div class="modal-box" onclick="event.stopPropagation()">
-        <div class="modal-header">
-          <span
-            ><i class="fa-solid fa-wrench text-indigo-600 mr-1"></i> Adicionar
-            Serviço</span
-          >
-          <button
-            id="btnFecharModalAdicionar"
-            style="
-              background: none;
-              border: none;
-              font-size: 20px;
-              color: #94a3b8;
-            "
-          >
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-
-        <div
-          style="
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-          "
+      <div class="px-3 pt-3">
+        <button
+          onclick="window.location.href = '../index.html'"
+          class="esconder-no-electron w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-md text-sm font-semibold transition-colors"
         >
-          <div>
-            <label class="field-label"
-              >Serviço <span class="req">*</span></label
-            >
-
-            <!-- ===== Dropdown customizado (substitui <select> + botão do APK) ===== -->
-            <div id="modalSelectServico"></div>
-          </div>
-
-          <!-- Grupo de Cor (Reforma) -->
-          <div id="modalGrupoCor" class="hidden">
-            <label class="field-label"
-              >Cor da Roda <span class="req">*</span></label
-            >
-            <input
-              type="text"
-              id="modalInputCor"
-              class="field"
-              placeholder="Ex: BLACK PIANO"
-              autocomplete="off"
-            />
-          </div>
-
-          <!-- NOVO Grupo de Placa (Alinhamento/Camber/Caster) -->
-          <div id="modalGrupoPlaca" class="hidden">
-            <label class="field-label"
-              >Placa do Veículo <span class="req">*</span></label
-            >
-            <input
-              type="text"
-              id="modalInputPlaca"
-              class="field"
-              placeholder="Ex: ABC1D23"
-              maxlength="8"
-              autocomplete="off"
-            />
-          </div>
-
-          <!-- Grupo de Número OS (Conserto/Solda) -->
-          <div id="modalGrupoNumero" class="hidden">
-            <label class="field-label"
-              >Número da OS <span class="req">*</span></label
-            >
-            <input
-              type="text"
-              id="modalInputNumero"
-              class="field"
-              placeholder="Digite o número"
-              inputmode="numeric"
-              autocomplete="off"
-            />
-          </div>
-
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="field-label"
-                >Quantidade <span class="req">*</span></label
-              >
-              <input
-                type="number"
-                id="modalInputQtd"
-                min="1"
-                value="1"
-                class="field bg-slate-800 text-white"
-              />
-            </div>
-            <div>
-              <label class="field-label"
-                >Valor (R$) <span class="req">*</span></label
-              >
-              <input
-                type="tel"
-                id="modalInputValor"
-                class="field bg-slate-800 text-white font-bold text-emerald-400"
-                placeholder="R$ 0,00"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div
-          style="
-            padding: 16px;
-            border-top: 1px solid #e2e8f0;
-            background: #f8fafc;
-          "
-        >
-          <button
-            id="btnConfirmarItem"
-            class="submit-button"
-            style="height: 44px; font-size: 14px"
-          >
-            <i class="fa-solid fa-plus"></i> Adicionar à OS
-          </button>
-        </div>
+          <i class="fa-solid fa-arrow-left text-sm"></i>
+          Cadastro de O.S
+        </button>
       </div>
-    </div>
 
-    <!-- NOVO MODAL DE PLACA OPCIONAL -->
-    <div id="modalPlacaOpcional" class="modal-custom" style="z-index: 1600">
-      <div class="modal-box" onclick="event.stopPropagation()">
-        <div class="modal-header">
+      <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <p
+          class="text-[10px] text-slate-500 font-bold uppercase px-3 mb-2 tracking-wider"
+        >
+          Principal
+        </p>
+        <a class="sidebar-link active" data-view="dashboard">
+          <i class="fa-solid fa-chart-pie"></i>Dashboard
+        </a>
+        <a class="sidebar-link" data-view="os">
+          <i class="fa-solid fa-clipboard-list"></i>Todas as OS
           <span
-            ><i class="fa-solid fa-car text-indigo-600 mr-1"></i> Placa do
-            Veículo</span
+            id="badgeTotal"
+            class="ml-auto bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full"
+            >0</span
           >
-          <button
-            id="btnFecharModalPlaca"
-            style="
-              background: none;
-              border: none;
-              font-size: 20px;
-              color: #94a3b8;
-            "
-          >
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-        <div
-          style="
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-          "
+        </a>
+        <a class="sidebar-link" data-view="fotos">
+          <i class="fa-solid fa-images"></i>Galeria de Fotos
+        </a>
+
+        <p
+          class="text-[10px] text-slate-500 font-bold uppercase px-3 mt-5 mb-2 tracking-wider"
         >
-          <div>
-            <label class="field-label">Placa (Opcional)</label>
-            <input
-              type="text"
-              id="inputPlacaOpcional"
-              class="field"
-              placeholder="Ex: ABC1D23"
-              maxlength="8"
-              autocomplete="off"
-            />
-          </div>
-        </div>
-        <div
-          style="
-            padding: 16px;
-            border-top: 1px solid #e2e8f0;
-            background: #f8fafc;
-          "
-        >
-          <button
-            id="btnSalvarPlacaOpcional"
-            class="submit-button"
-            style="height: 44px; font-size: 14px"
+          Filtros rápidos
+        </p>
+        <a class="sidebar-link" data-filter="Pendente">
+          <i class="fa-solid fa-clock text-amber-400"></i>Pendentes
+          <span
+            id="badgePendente"
+            class="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300"
+            >0</span
           >
-            <i class="fa-solid fa-check"></i> Salvar Placa
-          </button>
+        </a>
+        <a class="sidebar-link" data-filter="Em andamento">
+          <i class="fa-solid fa-spinner text-blue-400"></i>Em andamento
+          <span
+            id="badgeAndamento"
+            class="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300"
+            >0</span
+          >
+        </a>
+        <a class="sidebar-link" data-filter="Concluído">
+          <i class="fa-solid fa-circle-check text-green-400"></i>Concluídos
+          <span
+            id="badgeConcluido"
+            class="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-500/20 text-green-300"
+            >0</span
+          >
+        </a>
+      </nav>
+
+      <div class="px-4 py-4 border-t border-slate-800 flex items-center gap-3">
+        <div
+          class="w-9 h-9 rounded-full bg-gradient-to-br from-sky-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+        >
+          AD
         </div>
+        <div class="min-w-0">
+          <p class="text-sm font-semibold truncate">Admin</p>
+          <p class="text-[10px] text-slate-400 truncate">admin@osfacil.com</p>
+        </div>
+        <button
+          class="ml-auto text-slate-400 hover:text-white transition flex-shrink-0"
+        >
+          <i class="fa-solid fa-right-from-bracket text-sm"></i>
+        </button>
       </div>
-    </div>
+    </aside>
 
-    <!-- ============================================================ -->
-    <!-- NOVO MODAL: CPF / CNPJ                                       -->
-    <!-- ============================================================ -->
-    <div id="modalDocumento" class="modal-custom" style="z-index: 1600; display: none">
-      <div class="modal-box" onclick="event.stopPropagation()">
-        <div class="modal-header">
-          <span
-            ><i class="fa-solid fa-id-card text-indigo-600 mr-1"></i>
-            CPF / CNPJ</span
-          >
-          <button
-            id="btnFecharModalDocumento"
-            style="
-              background: none;
-              border: none;
-              font-size: 20px;
-              color: #94a3b8;
-            "
-          >
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
+    <!-- ================= MAIN ================= -->
+    <div class="flex-1 flex flex-col overflow-hidden min-w-0">
+      <header class="bg-white border-b border-slate-200 flex-shrink-0">
         <div
-          style="
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-          "
+          class="px-3 md:px-6 py-3 flex items-center gap-2 md:gap-3 flex-wrap"
         >
-          <div>
-            <label class="field-label" for="inputDocumento"
-              >Documento (CPF ou CNPJ)</label
+          <button
+            id="mobileMenuBtn"
+            onclick="abrirSidebar()"
+            class="lg:hidden w-9 h-9 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 flex-shrink-0"
+          >
+            <i class="fa-solid fa-bars text-sm"></i>
+          </button>
+
+          <div class="min-w-0">
+            <h1
+              id="pageTitle"
+              class="text-base md:text-lg font-bold text-slate-800 truncate"
             >
-            <input
-              type="text"
-              id="inputDocumento"
-              class="field"
-              placeholder="000.000.000-00 ou 00.000.000/0000-00"
-              maxlength="18"
-              inputmode="numeric"
-              autocomplete="off"
-            />
+              Dashboard
+            </h1>
             <p
-              style="
-                font-size: 11px;
-                color: #64748b;
-                margin-top: 6px;
-                display: flex;
-                align-items: center;
-                gap: 4px;
-              "
+              id="pageSubtitle"
+              class="text-[10px] md:text-xs text-slate-500 truncate hidden sm:block"
             >
-              <i class="fa-solid fa-circle-info text-indigo-400"></i>
-              Digite apenas os números. O formato é aplicado automaticamente.
+              Visão geral das ordens de serviço
             </p>
           </div>
-        </div>
-        <div
-          style="
-            padding: 16px;
-            border-top: 1px solid #e2e8f0;
-            background: #f8fafc;
-            display: flex;
-            gap: 8px;
-          "
-        >
-          <button
-            id="btnRemoverDocumento"
-            type="button"
-            style="
-              height: 44px;
-              font-size: 13px;
-              padding: 0 14px;
-              background: #fff;
-              color: #dc2626;
-              border: 1px solid #fecaca;
-              border-radius: 10px;
-              font-weight: 600;
-            "
-          >
-            <i class="fa-solid fa-trash"></i> Limpar
-          </button>
-          <button
-            id="btnSalvarDocumento"
-            class="submit-button"
-            style="height: 44px; font-size: 14px; flex: 1"
-          >
-            <i class="fa-solid fa-check"></i> Salvar Documento
-          </button>
-        </div>
-      </div>
-    </div>
 
-    <!-- MODAL DE DETALHES DO SERVIÇO -->
-    <div
-      id="modalDetalhesServico"
-      class="modal-custom"
-      style="z-index: 1500; display: none"
-    >
-      <div class="modal-box" onclick="event.stopPropagation()">
-        <div class="modal-header">
-          <span id="tituloModalDetalhes"
-            ><i class="fa-solid fa-sliders text-indigo-600 mr-1"></i> Detalhes
-            do Serviço</span
-          >
           <button
-            id="btnFecharModalDetalhes"
-            style="
-              background: none;
-              border: none;
-              font-size: 20px;
-              color: #94a3b8;
-            "
+            id="btnAtualizar"
+            aria-label="Atualizar dados"
+            onclick="carregarDados()"
+            class="md:ml-0 ml-auto md:order-last w-9 h-9 rounded-lg border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 flex-shrink-0"
+            title="Atualizar dados"
           >
-            <i class="fa-solid fa-xmark"></i>
+            <i class="fa-solid fa-rotate-right text-sm"></i>
           </button>
-        </div>
-        <div
-          style="
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-          "
-        >
-          <div id="grupoCorModal">
-            <label for="inputCor" class="field-label"
-              >Cor <span class="req">*</span></label
-            >
-            <input
-              type="text"
-              id="inputCor"
-              class="field"
-              placeholder="Digite a cor"
-              autocomplete="off"
-            />
-          </div>
-          <div>
-            <label for="inputNumeroOSDinamico" class="field-label"
-              >Número da OS <span class="req">*</span></label
-            >
-            <input
-              type="text"
-              id="inputNumeroOSDinamico"
-              class="field"
-              placeholder="Digite o número da OS"
-              autocomplete="off"
-              inputmode="numeric"
-            />
-          </div>
-        </div>
-        <div
-          style="
-            padding: 16px;
-            border-top: 1px solid #e2e8f0;
-            background: #f8fafc;
-          "
-        >
-          <button
-            id="btnSalvarDetalhes"
-            class="submit-button"
-            style="height: 44px; font-size: 14px"
-          >
-            <i class="fa-solid fa-check"></i> Confirmar Detalhes
-          </button>
-        </div>
-      </div>
-    </div>
 
-    <!-- MODAL DE OPÇÕES GENÉRICO -->
-    <div id="customModal" class="modal-custom">
-      <div class="modal-box" onclick="event.stopPropagation()">
-        <div class="modal-header">
-          <span id="modalTitle">Selecione</span>
-          <button
-            id="btnFecharModalOpcoes"
-            style="
-              background: none;
-              border: none;
-              font-size: 20px;
-              color: #94a3b8;
-            "
+          <div
+            class="relative order-last w-full md:order-none md:w-64 lg:w-72 md:ml-auto"
           >
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-        <div id="modalList" class="modal-list"></div>
-      </div>
-    </div>
-
-    <!-- MODAL DE PESQUISA -->
-    <div
-      id="modalPesquisa"
-      class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-3"
-    >
-      <div
-        class="bg-white rounded-2xl flex flex-col overflow-hidden shadow-2xl w-full max-w-md h-[80vh]"
-      >
-        <div
-          class="bg-[#172033] text-white p-4 flex items-center justify-between flex-shrink-0"
-        >
-          <div class="flex items-center gap-2">
-            <i class="fa-solid fa-magnifying-glass text-indigo-400"></i>
-            <h2 class="text-sm font-bold">Pesquisar Ordem de Serviço</h2>
-          </div>
-          <button
-            type="button"
-            id="btnFecharPesquisa"
-            class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/20 transition-colors"
-          >
-            <i class="fa-solid fa-xmark text-sm"></i>
-          </button>
-        </div>
-
-        <div class="p-3 bg-slate-100 border-b border-slate-200 flex-shrink-0">
-          <div class="relative">
             <i
-              class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"
+              class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"
             ></i>
             <input
-              id="inputBusca"
+              id="searchInput"
               type="text"
-              class="field pl-8 uppercase"
-              placeholder="Digite o nome ou ID/nº do serviço..."
+              placeholder="Buscar OS, cliente, telefone..."
+              class="search-input w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 placeholder:text-slate-400 transition"
             />
           </div>
-        </div>
-
-        <div
-          id="listaResultados"
-          class="flex-1 overflow-y-auto p-3 flex flex-col gap-3 bg-slate-50"
-        >
-          <div class="text-center py-10 text-slate-400 text-xs">
-            <i class="fa-solid fa-clipboard text-2xl mb-2 text-slate-300"></i>
-            <p>Digite algo para pesquisar os serviços salvos.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MODAL DE IMAGENS -->
-    <div
-      id="modalImagens"
-      class="fixed inset-0 z-[60] bg-black/95 hidden flex flex-col justify-between p-4"
-    >
-      <div
-        class="flex justify-between items-center text-white z-10 relative mt-8"
-      >
-        <span
-          id="contadorFotoModal"
-          class="text-sm font-semibold bg-white/10 px-3 py-1 rounded-full"
-          >1/1</span
-        >
-        <button
-          type="button"
-          id="btnFecharImagens"
-          class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition"
-        >
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
-
-      <div
-        class="flex-1 flex items-center justify-between relative py-4 overflow-hidden"
-        id="areaImagem"
-      >
-        <button
-          id="btnPrev"
-          class="absolute left-2 md:left-10 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-xl transition hidden"
-        >
-          <i class="fa-solid fa-chevron-left"></i>
-        </button>
-        <img
-          id="imagemAmpliada"
-          src=""
-          class="max-w-full max-h-full object-contain rounded-lg shadow-2xl mx-auto transition-opacity duration-200"
-          alt="Foto Ampliada"
-        />
-        <button
-          id="btnNext"
-          class="absolute right-2 md:right-10 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-xl transition hidden"
-        >
-          <i class="fa-solid fa-chevron-right"></i>
-        </button>
-      </div>
-
-      <div class="text-center text-slate-400 text-xs py-2 z-10 relative mb-4">
-        Deslize para os lados ou use as setas
-      </div>
-    </div>
-
-    <!-- CONTEÚDO PRINCIPAL -->
-    <div class="app">
-      <header class="app-header">
-        <div class="flex items-center gap-3">
-          <div
-            class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white/10"
-          >
-            <i class="fa-solid fa-clipboard-list text-xl"></i>
-          </div>
-          <div class="min-w-0">
-            <h1 class="text-base font-bold leading-tight">OS Fácil</h1>
-            <p
-              class="mt-1 text-[10px] text-slate-300 flex items-center gap-1 cursor-pointer hover:text-white transition"
-              id="triggerAlterarNome"
-            >
-              <i class="fa-solid fa-mobile-screen text-[9px]"></i>
-              <span id="nomeAparelhoDisplay">Carregando...</span>
-              <i class="fa-solid fa-pen text-[8px] ml-1 opacity-50"></i>
-            </p>
-          </div>
-          <div class="ml-auto flex items-center gap-2">
-            <button
-              type="button"
-              id="btnAbrirPesquisa"
-              onclick="window.location.replace('./os_painel/index.html')"
-              class="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-1.5 px-3 rounded-lg shadow transition-colors"
-            >
-              <i class="fa-solid fa-table-list text-[10px]"></i>
-              <span class="hidden sm:inline">Painel OS</span>
-            </button>
-          </div>
-        </div>
-        <div class="header-step">
-          <div class="step-dot active" id="step1"></div>
-          <div class="step-dot" id="step2"></div>
-          <div class="step-dot" id="step3"></div>
         </div>
       </header>
 
-      <main class="app-main">
-        <form id="osForm" class="flex min-h-0 flex-1 flex-col gap-2" novalidate>
-          <section class="form-card" id="cardCliente">
-            <div class="mb-2 flex items-center gap-2">
-              <i class="fa-solid fa-user text-xs text-indigo-600"></i>
-              <h2 class="text-sm font-bold text-slate-800">Dados do cliente</h2>
-              <span class="field-hint" id="hintCliente">1 de 3</span>
-
-              <!-- ================================================ -->
-              <!-- BOTÃO DISCRETO PARA ABRIR MODAL DE CPF / CNPJ   -->
-              <!-- ================================================ -->
-              <button
-                type="button"
-                id="btnAbrirDocumento"
-                class="ml-auto inline-flex items-center gap-1 rounded-md border border-slate-300 bg-slate-50 px-2 py-1 text-[10px] font-semibold text-slate-600 hover:bg-slate-100 active:scale-95 transition-all"
-                title="Cadastrar CPF / CNPJ"
-              >
-                <i
-                  class="fa-regular fa-id-card text-[10px]"
-                  id="iconDocumento"
-                ></i>
-                <span id="labelDocumento">CPF/CNPJ</span>
-              </button>
-            </div>
-
-            <!-- Hidden input que guarda o documento e vai junto no envio -->
-            <input type="hidden" id="documento" name="documento" />
-
-            <div class="mb-3">
-              <label for="nome" class="field-label"
-                >Nome do cliente (Opcional)</label
-              >
-              <div class="field-wrap">
-                <i class="fa-solid fa-user field-icon"></i>
-                <input
-                  id="nome"
-                  name="nome"
-                  class="field"
-                  type="text"
-                  placeholder="Consumidor"
-                  autocomplete="name"
-                />
-                <i
-                  class="fa-solid fa-circle-check field-status ok"
-                  id="statusNome"
-                  style="display: none"
-                ></i>
-              </div>
-            </div>
-            <div>
-              <label for="telefone" class="field-label"
-                >Telefone (Opcional)</label
-              >
-              <div class="flex gap-2">
-                <input type="hidden" id="paisDDI" value="+55" />
-                <button type="button" id="btnDDI" class="btn-ddi">
-                  🇧🇷 +55
-                </button>
-                <div class="field-wrap">
-                  <i class="fa-solid fa-phone field-icon"></i>
-                  <input
-                    id="telefone"
-                    name="telefone"
-                    class="field"
-                    type="tel"
-                    placeholder="(00) 00000-0000"
-                    autocomplete="tel"
-                    inputmode="tel"
-                  />
+      <main class="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">
+        <!-- ============ DASHBOARD VIEW ============ -->
+        <div id="viewDashboard" class="space-y-4 lg:space-y-6">
+          <div
+            class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-4"
+          >
+            <div
+              class="stat-card cursor-pointer transition-transform hover:-translate-y-1"
+              onclick="filtrarPorCard('all')"
+            >
+              <div class="flex items-start justify-between mb-2 lg:mb-3">
+                <div
+                  class="w-9 h-9 lg:w-10 lg:h-10 rounded-xl bg-indigo-50 flex items-center justify-center"
+                >
                   <i
-                    class="fa-solid fa-circle-check field-status ok"
-                    id="statusTelefone"
-                    style="display: none"
+                    class="fa-solid fa-clipboard-list text-indigo-600 text-sm lg:text-base"
                   ></i>
                 </div>
               </div>
+              <p
+                class="text-xl lg:text-2xl font-extrabold text-slate-800"
+                id="statTotal"
+              >
+                0
+              </p>
+              <p
+                class="text-[10px] lg:text-xs text-slate-500 mt-1 leading-tight"
+              >
+                Ordens cadastradas
+              </p>
             </div>
-          </section>
 
-          <section class="form-card" id="cardServico">
-            <div class="mb-2 flex items-center gap-2">
-              <i
-                class="fa-solid fa-screwdriver-wrench text-xs text-indigo-600"
-              ></i>
-              <h2 class="text-sm font-bold text-slate-800">Dados do serviço</h2>
-              <span class="field-hint" id="hintServico">2 de 3</span>
-            </div>
-
-            <!-- LISTA DE ITENS JÁ ADICIONADOS -->
             <div
-              id="containerItensAdicionados"
-              class="flex flex-col gap-2 mb-3"
-            ></div>
-
-            <!-- BOTÕES LADO A LADO -->
-            <div class="flex gap-2 mb-3">
-              <!-- Botão Adicionar Serviço (Ocupa 2/3) -->
-              <button
-                type="button"
-                id="btnAdicionarItem"
-                class="flex-[2] h-12 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-lg shadow-md transition-colors flex items-center justify-center gap-2"
+              class="stat-card cursor-pointer transition-transform hover:-translate-y-1"
+              onclick="filtrarPorCard('Pendente')"
+            >
+              <div class="flex items-start justify-between mb-2 lg:mb-3">
+                <div
+                  class="w-9 h-9 lg:w-10 lg:h-10 rounded-xl bg-amber-50 flex items-center justify-center"
+                >
+                  <i
+                    class="fa-solid fa-clock text-amber-600 text-sm lg:text-base"
+                  ></i>
+                </div>
+              </div>
+              <p
+                class="text-xl lg:text-2xl font-extrabold text-slate-800"
+                id="statPendente"
               >
-                <i class="fa-solid fa-plus"></i> Adicionar Serviço
-              </button>
-
-              <!-- Botão Adicionar Placa (Ocupa 1/3) -->
-              <button
-                type="button"
-                id="btnAdicionarPlaca"
-                class="flex-1 h-12 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1.5"
+                0
+              </p>
+              <p
+                class="text-[10px] lg:text-xs text-slate-500 mt-1 leading-tight"
               >
-                <i class="fa-solid fa-car"></i> Placa
-              </button>
+                Pendentes
+              </p>
             </div>
 
-            <div class="mt-3">
-              <label for="observacao" class="field-label"
-                >Descrição do serviço <span class="req">*</span></label
+            <div
+              class="stat-card cursor-pointer transition-transform hover:-translate-y-1"
+              onclick="filtrarPorCard('Em andamento')"
+            >
+              <div class="flex items-start justify-between mb-2 lg:mb-3">
+                <div
+                  class="w-9 h-9 lg:w-10 lg:h-10 rounded-xl bg-blue-50 flex items-center justify-center"
+                >
+                  <i
+                    class="fa-solid fa-spinner text-blue-600 text-sm lg:text-base"
+                  ></i>
+                </div>
+              </div>
+              <p
+                class="text-xl lg:text-2xl font-extrabold text-slate-800"
+                id="statAndamento"
               >
-              <textarea
-                id="observacao"
-                name="observacao"
-                class="field"
-                placeholder="Descreva o problema..."
-                required
-              ></textarea>
+                0
+              </p>
+              <p
+                class="text-[10px] lg:text-xs text-slate-500 mt-1 leading-tight"
+              >
+                Em andamento
+              </p>
             </div>
-          </section>
 
-          <section class="photo-section" id="photoSection">
-            <div class="mb-2 flex flex-shrink-0 items-center justify-between">
-              <div class="flex items-center gap-2">
-                <i class="fa-solid fa-camera text-xs text-indigo-600"></i>
-                <h2 class="text-sm font-bold text-slate-800">
-                  Fotos do serviço <span class="req">*</span>
+            <div
+              class="stat-card cursor-pointer transition-transform hover:-translate-y-1"
+              onclick="filtrarPorCard('prontas')"
+            >
+              <div class="flex items-start justify-between mb-2 lg:mb-3">
+                <div
+                  class="w-9 h-9 lg:w-10 lg:h-10 rounded-xl bg-green-50 flex items-center justify-center"
+                >
+                  <i
+                    class="fa-solid fa-check-double text-green-600 text-sm lg:text-base"
+                  ></i>
+                </div>
+              </div>
+              <p
+                class="text-xl lg:text-2xl font-extrabold text-green-600"
+                id="statProntas"
+              >
+                0
+              </p>
+              <p
+                class="text-[10px] lg:text-xs text-slate-500 mt-1 leading-tight"
+              >
+                Prontas p/ Retirada
+              </p>
+            </div>
+
+            <div
+              id="cardFaturamento"
+              class="stat-card cursor-pointer relative overflow-hidden group hover:-translate-y-1"
+              role="button"
+              tabindex="0"
+              aria-label="Faturamento oculto. Digite a senha para ver"
+              onclick="alternarFaturamento()"
+            >
+              <div class="flex items-start justify-between mb-2 lg:mb-3">
+                <div
+                  class="w-9 h-9 lg:w-10 lg:h-10 rounded-xl bg-emerald-50 flex items-center justify-center"
+                >
+                  <i
+                    class="fa-solid fa-dollar-sign text-emerald-600 text-sm lg:text-base"
+                  ></i>
+                </div>
+                <span
+                  class="text-slate-400 group-hover:text-slate-600 transition-colors"
+                >
+                  <i
+                    id="iconeCadeado"
+                    class="fa-solid fa-eye-slash text-xs"
+                  ></i>
+                </span>
+              </div>
+              <p
+                class="text-sm lg:text-xl font-extrabold text-slate-800 whitespace-nowrap overflow-hidden text-ellipsis"
+                id="statFaturamento"
+              >
+                ••••••
+              </p>
+              <p
+                class="text-[10px] lg:text-xs text-slate-500 mt-1 leading-tight"
+              >
+                Faturamento total
+                <span class="block text-[9px] lg:text-[10px] text-slate-400"
+                  >exceto canceladas</span
+                >
+              </p>
+            </div>
+          </div>
+
+          <div
+            class="bg-white border border-slate-200 rounded-2xl overflow-hidden"
+          >
+            <div
+              class="px-4 lg:px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/50 gap-3"
+            >
+              <div class="min-w-0">
+                <h2 class="font-bold text-slate-800 text-sm lg:text-base">
+                  Últimas ordens de serviço
                 </h2>
+                <p class="text-[10px] lg:text-xs text-slate-500 mt-0.5">
+                  As 10 mais recentes do banco
+                </p>
+              </div>
+              <button
+                class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 flex-shrink-0"
+                onclick="mudarView('os')"
+              >
+                Ver todas <i class="fa-solid fa-arrow-right text-[10px]"></i>
+              </button>
+            </div>
+            <div id="recentList" class="flex flex-col"></div>
+          </div>
+        </div>
+
+        <!-- ============ OS VIEW ============ -->
+        <div id="viewOS" class="hidden space-y-4">
+          <!-- CARD DE FILTROS -->
+          <div
+            class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col gap-3"
+          >
+            <!-- Linha 1: Botões de Status -->
+            <div class="flex gap-2 overflow-x-auto pb-1 lg:pb-0">
+              <button class="filter-btn active flex-shrink-0" data-status="all">
+                Todas
+              </button>
+              <button class="filter-btn flex-shrink-0" data-status="Pendente">
+                Pendentes
+              </button>
+              <button
+                class="filter-btn flex-shrink-0"
+                data-status="Em andamento"
+              >
+                Em andamento
+              </button>
+              <button class="filter-btn flex-shrink-0" data-status="Concluído">
+                Concluídas
+              </button>
+              <button class="filter-btn flex-shrink-0" data-status="Cancelado">
+                Canceladas
+              </button>
+            </div>
+
+            <!-- Linha 2: Ordenação, Serviço e Datas -->
+            <div
+              class="flex flex-wrap items-center gap-3 pt-3 border-t border-slate-100"
+            >
+              <div class="flex items-center gap-2">
+                <label
+                  class="text-[10px] font-bold text-slate-500 uppercase hidden sm:block"
+                  >Ordenar</label
+                >
+                <div id="sortSelect" class="w-[130px]"></div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <label
+                  class="text-[10px] font-bold text-slate-500 uppercase hidden sm:block"
+                  >Serviço</label
+                >
+                <div id="filtroServico" class="w-[160px]"></div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <label
+                  class="text-[10px] font-bold text-slate-500 uppercase hidden sm:block"
+                  >De</label
+                >
+                <div class="relative flex items-center">
+                  <input
+                    type="text"
+                    id="dataInicial"
+                    placeholder="De"
+                    class="h-[34px] pl-2 pr-8 border border-slate-200 rounded-lg text-xs w-28"
+                  />
+                  <i
+                    class="fa-regular fa-calendar absolute right-2 text-slate-400 pointer-events-none"
+                  ></i>
+                </div>
+
+                <label
+                  class="text-[10px] font-bold text-slate-500 uppercase hidden sm:block"
+                  >Até</label
+                >
+                <div class="relative flex items-center">
+                  <input
+                    type="text"
+                    id="dataFinal"
+                    placeholder="Até"
+                    class="h-[34px] pl-2 pr-8 border border-slate-200 rounded-lg text-xs w-28"
+                  />
+                  <i
+                    class="fa-regular fa-calendar absolute right-2 text-slate-400 pointer-events-none"
+                  ></i>
+                </div>
+
+                <button
+                  type="button"
+                  id="btnLimparDatas"
+                  class="h-[34px] px-3 ml-2 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 transition"
+                >
+                  Limpar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabela (desktop) -->
+          <div
+            id="desktopOSWrapper"
+            class="hidden lg:block bg-white border border-slate-200 rounded-2xl overflow-x-auto"
+          >
+            <table class="w-full min-w-[1100px]">
+              <thead class="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th
+                    class="text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-3 whitespace-nowrap"
+                  >
+                    Nº OS
+                  </th>
+                  <th
+                    class="text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-3 whitespace-nowrap"
+                  >
+                    Cliente
+                  </th>
+                  <th
+                    class="text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-3 whitespace-nowrap"
+                  >
+                    Telefone
+                  </th>
+                  <th
+                    class="text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-3"
+                  >
+                    Serviço
+                  </th>
+                  <th
+                    class="text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-3 whitespace-nowrap"
+                  >
+                    Placa
+                  </th>
+                  <th
+                    class="text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-3 whitespace-nowrap"
+                  >
+                    Cor
+                  </th>
+                  <th
+                    class="text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-3 whitespace-nowrap"
+                  >
+                    Origem
+                  </th>
+                  <th
+                    class="text-right text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-3 whitespace-nowrap"
+                  >
+                    Valor
+                  </th>
+                  <th
+                    class="text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-3 whitespace-nowrap"
+                  >
+                    Status
+                  </th>
+                  <th
+                    class="text-right text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 py-3 whitespace-nowrap"
+                  >
+                    Ações
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tableBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+            <div id="carregarMaisDesktop"></div>
+          </div>
+
+          <!-- Cards (mobile / tablet) -->
+          <div id="mobileOSWrapper" class="lg:hidden space-y-3">
+            <div id="mobileList" class="space-y-3"></div>
+            <div id="carregarMaisMobile"></div>
+          </div>
+
+          <!-- Estado vazio (compartilhado) -->
+          <div
+            id="emptyState"
+            class="hidden bg-white border border-slate-200 rounded-2xl px-5 py-16 text-center"
+          >
+            <div
+              class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3"
+            >
+              <i class="fa-solid fa-inbox text-2xl text-slate-400"></i>
+            </div>
+            <p class="text-sm font-semibold text-slate-700">
+              Nenhuma OS encontrada
+            </p>
+            <p class="text-xs text-slate-500 mt-1">
+              Tente ajustar os filtros ou a busca.
+            </p>
+          </div>
+        </div>
+
+        <!-- ============ FOTOS VIEW ============ -->
+        <div id="viewFotos" class="hidden">
+          <div
+            class="bg-white border border-slate-200 rounded-2xl p-3 sm:p-4 lg:p-6"
+          >
+            <div class="flex items-center justify-between mb-4 lg:mb-5 gap-3">
+              <div class="min-w-0">
+                <h2 class="font-bold text-slate-800 text-sm lg:text-base">
+                  Galeria de fotos
+                </h2>
+                <p class="text-[10px] lg:text-xs text-slate-500 mt-0.5">
+                  Todas as fotos enviadas nas OS
+                </p>
               </div>
               <span
-                id="photoCount"
-                class="rounded-full bg-indigo-50 px-2 py-1 text-[11px] font-bold text-indigo-700"
-                >0/6 fotos</span
+                id="fotosCount"
+                class="text-[10px] lg:text-xs font-bold text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-full whitespace-nowrap"
+                >0 fotos</span
               >
             </div>
-            <p class="mb-2 flex-shrink-0 text-[11px] text-slate-500">
-              <i class="fa-solid fa-circle-info mr-1 text-indigo-400"></i>
-              Adicione pelo menos 1 foto.
-            </p>
-            <div id="photoGrid" class="photo-grid"></div>
-          </section>
-        </form>
+            <div
+              id="galeriaGrid"
+              class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 lg:gap-3"
+            ></div>
+            <div id="galeriaEmpty" class="hidden py-16 text-center">
+              <div
+                class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3"
+              >
+                <i class="fa-solid fa-images text-2xl text-slate-400"></i>
+              </div>
+              <p class="text-sm font-semibold text-slate-700">
+                Nenhuma foto cadastrada
+              </p>
+            </div>
+          </div>
+        </div>
       </main>
-
-      <footer class="app-footer">
-        <button
-          id="submitButton"
-          type="submit"
-          form="osForm"
-          class="submit-button"
-        >
-          <i class="fa-solid fa-check"></i> ENVIAR PRÉ-CADASTRO
-        </button>
-      </footer>
     </div>
 
-    <!-- Bibliotecas e Módulo Principal -->
+    <!-- ================= MODAL ================= -->
+    <div id="modalDetalhes" class="modal-overlay">
+      <div
+        class="modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modalTitle"
+      >
+        <div
+          class="sticky top-0 bg-white border-b border-slate-200 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between rounded-t-[18px] z-10"
+        >
+          <div class="min-w-0">
+            <h2
+              class="font-bold text-slate-800 text-sm sm:text-base"
+              id="modalTitle"
+            >
+              Editar OS
+            </h2>
+            <p
+              class="text-[10px] sm:text-xs text-slate-500 mt-0.5 truncate"
+              id="modalSubtitle"
+            ></p>
+          </div>
+          <button
+            aria-label="Fechar"
+            onclick="fecharModal()"
+            class="w-9 h-9 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition flex-shrink-0"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div id="modalBody" class="p-3 sm:p-6 space-y-4 sm:space-y-5"></div>
+      </div>
+    </div>
+
+    <!-- ================= LIGHTBOX ================= -->
+    <div id="lightbox" class="lightbox" onclick="fecharLightbox(event)">
+      <button
+        class="lightbox-close"
+        aria-label="Fechar foto"
+        onclick="fecharLightbox(event)"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <button
+        id="lightboxPrev"
+        aria-label="Foto anterior"
+        class="lightbox-nav prev hidden"
+        onclick="
+          event.stopPropagation();
+          navegarLightbox(-1);
+        "
+      >
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <img
+        id="lightboxImg"
+        src=""
+        alt="Visualização da foto"
+        onclick="event.stopPropagation()"
+      />
+      <button
+        id="lightboxNext"
+        aria-label="Próxima foto"
+        class="lightbox-nav next hidden"
+        onclick="
+          event.stopPropagation();
+          navegarLightbox(1);
+        "
+      >
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+      <div id="lightboxCounter" class="lightbox-counter hidden">1 / 1</div>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <!-- BIBLIOTECAS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <!-- SETUP DO PLUGIN CAMERA (Capacitor) -->
     <script>
       (function setupCamera() {
         if (
@@ -770,181 +710,10 @@
       })();
     </script>
 
-    <!-- ============================================================
-         SCRIPT: MÓDULO CPF / CNPJ
-         ============================================================ -->
-    <script>
-      (function () {
-        const modalDoc = document.getElementById("modalDocumento");
-        const btnAbrir = document.getElementById("btnAbrirDocumento");
-        const btnFechar = document.getElementById("btnFecharModalDocumento");
-        const btnSalvar = document.getElementById("btnSalvarDocumento");
-        const btnRemover = document.getElementById("btnRemoverDocumento");
-        const inputDoc = document.getElementById("inputDocumento");
-        const hiddenDoc = document.getElementById("documento");
-        const labelDoc = document.getElementById("labelDocumento");
-        const iconDoc = document.getElementById("iconDocumento");
+    <!-- REGISTRO DO SERVICE WORKER (só roda no navegador) -->
+    <script src="js/registrar-sw.js"></script>
 
-        if (!modalDoc || !btnAbrir) return;
-
-        /* ---------- Máscara automática CPF / CNPJ ---------- */
-        function formatarDocumento(valor) {
-          const d = valor.replace(/\D/g, "").slice(0, 14);
-
-          if (d.length <= 11) {
-            // CPF: 000.000.000-00
-            if (d.length <= 3) return d;
-            if (d.length <= 6) return d.slice(0, 3) + "." + d.slice(3);
-            if (d.length <= 9)
-              return d.slice(0, 3) + "." + d.slice(3, 6) + "." + d.slice(6);
-            return (
-              d.slice(0, 3) +
-              "." +
-              d.slice(3, 6) +
-              "." +
-              d.slice(6, 9) +
-              "-" +
-              d.slice(9)
-            );
-          }
-
-          // CNPJ: 00.000.000/0000-00
-          if (d.length <= 2) return d;
-          if (d.length <= 5) return d.slice(0, 2) + "." + d.slice(2);
-          if (d.length <= 8)
-            return d.slice(0, 2) + "." + d.slice(2, 5) + "." + d.slice(5);
-          if (d.length <= 12)
-            return (
-              d.slice(0, 2) +
-              "." +
-              d.slice(2, 5) +
-              "." +
-              d.slice(5, 8) +
-              "/" +
-              d.slice(8)
-            );
-          return (
-            d.slice(0, 2) +
-            "." +
-            d.slice(2, 5) +
-            "." +
-            d.slice(5, 8) +
-            "/" +
-            d.slice(8, 12) +
-            "-" +
-            d.slice(12)
-          );
-        }
-
-        /* ---------- Atualiza o estado visual do botão ---------- */
-        function atualizarBotao() {
-          const val = hiddenDoc.value;
-          if (val) {
-            // Estado "preenchido" (verde discreto)
-            btnAbrir.classList.remove(
-              "border-slate-300",
-              "bg-slate-50",
-              "text-slate-600",
-              "hover:bg-slate-100"
-            );
-            btnAbrir.classList.add(
-              "border-emerald-300",
-              "bg-emerald-50",
-              "text-emerald-700",
-              "hover:bg-emerald-100"
-            );
-            iconDoc.className = "fa-solid fa-circle-check text-[10px]";
-            // Mostra valor formatado (curto)
-            const curto =
-              val.length > 15 ? val.slice(0, 15) + "…" : val;
-            labelDoc.textContent = curto;
-            labelDoc.title = val;
-          } else {
-            // Estado "vazio" (neutro discreto)
-            btnAbrir.classList.remove(
-              "border-emerald-300",
-              "bg-emerald-50",
-              "text-emerald-700",
-              "hover:bg-emerald-100"
-            );
-            btnAbrir.classList.add(
-              "border-slate-300",
-              "bg-slate-50",
-              "text-slate-600",
-              "hover:bg-slate-100"
-            );
-            iconDoc.className = "fa-regular fa-id-card text-[10px]";
-            labelDoc.textContent = "CPF/CNPJ";
-            labelDoc.title = "";
-          }
-        }
-
-        /* ---------- Abrir modal ---------- */
-        btnAbrir.addEventListener("click", () => {
-          inputDoc.value = hiddenDoc.value || "";
-          modalDoc.style.display = "flex";
-          setTimeout(() => {
-            inputDoc.focus();
-            inputDoc.setSelectionRange(
-              inputDoc.value.length,
-              inputDoc.value.length
-            );
-          }, 120);
-        });
-
-        /* ---------- Fechar modal (X) ---------- */
-        btnFechar.addEventListener("click", () => {
-          modalDoc.style.display = "none";
-        });
-
-        /* ---------- Fechar clicando fora ---------- */
-        modalDoc.addEventListener("click", (e) => {
-          if (e.target === modalDoc) modalDoc.style.display = "none";
-        });
-
-        /* ---------- Máscara em tempo real ---------- */
-        inputDoc.addEventListener("input", (e) => {
-          e.target.value = formatarDocumento(e.target.value);
-        });
-
-        /* ---------- Salvar ---------- */
-        btnSalvar.addEventListener("click", () => {
-          const formatado = inputDoc.value.trim();
-          const digitos = formatado.replace(/\D/g, "");
-
-          if (digitos.length === 0) {
-            // Campo vazio = limpar
-            hiddenDoc.value = "";
-            atualizarBotao();
-            modalDoc.style.display = "none";
-            return;
-          }
-
-          if (digitos.length !== 11 && digitos.length !== 14) {
-            alert(
-              "Documento inválido.\n• CPF deve ter 11 dígitos.\n• CNPJ deve ter 14 dígitos."
-            );
-            return;
-          }
-
-          hiddenDoc.value = formatado;
-          atualizarBotao();
-          modalDoc.style.display = "none";
-        });
-
-        /* ---------- Limpar / remover ---------- */
-        btnRemover.addEventListener("click", () => {
-          hiddenDoc.value = "";
-          inputDoc.value = "";
-          atualizarBotao();
-          modalDoc.style.display = "none";
-        });
-
-        /* ---------- Estado inicial ---------- */
-        atualizarBotao();
-      })();
-    </script>
-
-    <script type="module" src="./js/app.js"></script>
+    <!-- MÓDULO PRINCIPAL -->
+    <script type="module" src="js/main.js"></script>
   </body>
 </html>

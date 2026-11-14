@@ -5,7 +5,6 @@ import { toast } from "../utils.js";
 
 /* ---------- FUNÇÕES AUXILIARES ---------- */
 
-// Transforma a imagem em Base64 para o Electron/APK não bloquear a leitura
 async function converterImagemParaBase64(url) {
   try {
     const resposta = await fetch(url);
@@ -40,7 +39,6 @@ function baixarBlob(blob, nome) {
 export async function abrirRelatorio(os) {
   if (document.getElementById("modalRelatorio")) return;
 
-  // 1. Tenta converter a logo local para Base64 para funcionar no Electron/APK
   let logoBase64 = await converterImagemParaBase64("./assets/logo.png");
 
   const div = document.createElement("div");
@@ -52,6 +50,13 @@ export async function abrirRelatorio(os) {
   obsLimpa = obsLimpa.replace(/\s*\|\s*PLACA:[^|]*/g, "");
   obsLimpa = obsLimpa.replace(/\s*\|\s*COR:[^|]*/g, "");
   obsLimpa = obsLimpa.trim();
+
+  // O valor total real cobrado (já com desconto)
+  const totalFinal = Number(os.valor) || 0;
+  const desconto = Number(os.desconto) || 0;
+
+  // O subtotal (soma de todos os itens antes do desconto)
+  const subtotal = totalFinal + desconto;
 
   div.innerHTML = `
     <div class="bg-slate-100 rounded-xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh]">
@@ -73,7 +78,6 @@ export async function abrirRelatorio(os) {
           <div class="border-b-2 border-slate-900 pb-3 sm:pb-5 mb-4 sm:mb-6 flex flex-row justify-between items-center gap-2 sm:gap-4">
             <div class="flex items-center gap-2 sm:gap-4 flex-1">
               
-              <!-- Logo com fallback Base64 -->
               <img src="${logoBase64 || "./assets/logo.png"}" alt="Logo" crossorigin="anonymous" class="h-10 sm:h-16 w-auto object-contain rounded-lg shadow-sm flex-shrink-0" onerror="this.style.display='none'" />
               
               <div class="border-l border-slate-300 pl-2 sm:pl-4">
@@ -93,14 +97,12 @@ export async function abrirRelatorio(os) {
           <!-- DADOS DO CLIENTE E VEÍCULO -->
           <div class="grid grid-cols-2 gap-2 sm:gap-4 mb-4 sm:mb-6">
             
-            <!-- Card Cliente -->
             <div class="bg-slate-50 p-2 sm:p-3.5 rounded-md border border-slate-300">
               <p class="text-[8px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Dados do Cliente</p>
               <p class="text-xs sm:text-sm font-extrabold text-slate-900 leading-tight break-words">${esc(os.nome) || "Não informado"}</p>
               <p class="text-[10px] sm:text-xs text-slate-700 font-semibold mt-1 flex items-center break-all"><i class="fa-solid fa-phone text-slate-500 mr-1 text-[9px] sm:text-[12px]"></i> ${esc(os.telefone) || "Sem contato"}</p>
             </div>
             
-            <!-- Card Veículo -->
             <div class="bg-slate-50 p-2 sm:p-3.5 rounded-md border border-slate-300 flex flex-col justify-between">
               <p class="text-[8px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Identificação do Veículo</p>
               <div class="flex gap-2 sm:gap-6 items-center mt-1">
@@ -140,12 +142,14 @@ export async function abrirRelatorio(os) {
               ${(os.itens_servicos || [])
                 .map((item, index) => {
                   const qtd = item.quantidade || 1;
-                  const valorTotalItem = (item.valor || 0) * qtd;
+                  const valorTotalItem = Number(item.valor) || 0;
+                  const valorUnit = valorTotalItem / qtd;
+
                   return `
                 <tr class="${index % 2 === 0 ? "bg-white" : "bg-slate-50/50"}">
                   <td class="py-2.5 px-1.5 sm:py-3 sm:px-3 font-bold text-slate-800 break-words text-[10px] sm:text-sm">${esc(item.servico)}</td>
                   <td class="py-2.5 px-1 sm:py-3 sm:px-3 text-center font-bold text-slate-800 text-[10px] sm:text-sm">${qtd}</td>
-                  <td class="py-2.5 px-1.5 sm:py-3 sm:px-3 text-right font-semibold text-slate-700 whitespace-nowrap text-[10px] sm:text-sm">${formatarMoeda(item.valor)}</td>
+                  <td class="py-2.5 px-1.5 sm:py-3 sm:px-3 text-right font-semibold text-slate-700 whitespace-nowrap text-[10px] sm:text-sm">${formatarMoeda(valorUnit)}</td>
                   <td class="py-2.5 px-1.5 sm:py-3 sm:px-3 text-right font-extrabold text-slate-900 whitespace-nowrap text-[10px] sm:text-sm">${formatarMoeda(valorTotalItem)}</td>
                 </tr>
               `;
@@ -154,11 +158,32 @@ export async function abrirRelatorio(os) {
             </tbody>
           </table>
 
-          <!-- TOTALIZADOR -->
-          <div class="flex justify-end mb-4 sm:mb-6">
-            <div class="bg-slate-900 text-white rounded-md p-2.5 sm:p-4 flex items-center justify-between w-full sm:w-72 shadow-md">
-              <span class="font-extrabold text-[10px] sm:text-sm uppercase tracking-wider text-slate-300">Valor Total</span>
-              <span class="font-extrabold text-lg sm:text-2xl text-white">${formatarMoeda(os.valor)}</span>
+          <!-- TOTALIZADOR DISCRETO -->
+          <div class="flex justify-end mb-4 sm:mb-8">
+            <div class="bg-white border border-slate-300 rounded-lg p-3 sm:p-4 flex flex-col w-full sm:w-80 shadow-sm gap-2">
+              ${
+                desconto > 0
+                  ? `
+                <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                  <span class="text-xs text-slate-500">Subtotal:</span>
+                  <span class="text-sm font-semibold text-slate-700">${formatarMoeda(subtotal)}</span>
+                </div>
+                <div class="flex justify-between items-center border-b border-slate-100 pb-2 text-red-600">
+                  <span class="text-xs uppercase font-bold tracking-wider">Desconto:</span>
+                  <span class="text-sm font-bold">- ${formatarMoeda(desconto)}</span>
+                </div>
+                <div class="flex justify-between items-center pt-1 mt-1">
+                  <span class="font-extrabold text-[10px] sm:text-sm uppercase tracking-wider text-slate-500">Valor Final</span>
+                  <span class="font-extrabold text-lg sm:text-2xl text-slate-900">${formatarMoeda(totalFinal)}</span>
+                </div>
+                `
+                  : `
+                <div class="flex justify-between items-center">
+                  <span class="font-extrabold text-[10px] sm:text-sm uppercase tracking-wider text-slate-500">Valor Total</span>
+                  <span class="font-extrabold text-lg sm:text-2xl text-slate-900">${formatarMoeda(totalFinal)}</span>
+                </div>
+                `
+              }
             </div>
           </div>
 
@@ -214,11 +239,10 @@ export async function abrirRelatorio(os) {
     try {
       const elemento = document.getElementById("relatorioCaptura");
       const estiloOriginal = elemento.getAttribute("style");
-      
-      // Força o tamanho A4 para o PDF não sair cortado e evita folhas em branco
+
       elemento.style.width = "210mm";
-      elemento.style.padding = "10mm 15mm"; 
-      
+      elemento.style.padding = "10mm 15mm";
+
       const nomeArquivo = `OS-${numeroExibicao(os).replace(/[^\w-]/g, "_")}.pdf`;
 
       const opt = {
@@ -235,7 +259,6 @@ export async function abrirRelatorio(os) {
         .from(elemento)
         .outputPdf("blob");
 
-      // Restaura o estilo original
       if (estiloOriginal) {
         elemento.setAttribute("style", estiloOriginal);
       } else {
@@ -254,7 +277,7 @@ export async function abrirRelatorio(os) {
           titulo: `Relatório OS ${numeroExibicao(os)}`,
           texto: `Segue o relatório em PDF da sua OS: ${numeroExibicao(os)}`,
           fotoUrl: objectUrl,
-          isPdf: true, 
+          isPdf: true,
         });
 
         URL.revokeObjectURL(objectUrl);

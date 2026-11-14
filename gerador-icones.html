@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Gerador de Ícones PWA - OS Fácil</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        background: #0f172a;
+        color: white;
+        padding: 40px;
+        text-align: center;
+      }
+      canvas {
+        display: none;
+      }
+      .preview {
+        display: flex;
+        gap: 30px;
+        justify-content: center;
+        margin: 30px 0;
+        flex-wrap: wrap;
+      }
+      .item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+      .item img {
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      }
+      button {
+        background: #4f46e5;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+      button:hover {
+        background: #4338ca;
+      }
+      .maskable-preview {
+        border-radius: 50% !important;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Gerador de Ícones — OS Fácil</h1>
+    <p>
+      Certifique-se de que a imagem <code>assets/logo.png</code> está na mesma
+      pasta.
+    </p>
+
+    <div class="preview" id="preview"></div>
+
+    <canvas id="canvas" width="512" height="512"></canvas>
+
+    <script>
+      const img = new Image();
+      img.src = "./assets/logo.png";
+
+      img.onload = () => {
+        gerarIcone(192, false, "icon-192.png", "Normal (192x192)");
+        gerarIcone(512, false, "icon-512.png", "Normal (512x512)");
+        gerarIcone(
+          512,
+          true,
+          "icon-maskable-512.png",
+          "Maskable (Windows)",
+          true,
+        );
+      };
+
+      img.onerror = () => {
+        alert(
+          "Erro: Não encontrei a imagem em ./assets/logo.png. Verifique se o arquivo está na pasta correta.",
+        );
+      };
+
+      function gerarIcone(
+        tamanho,
+        isMaskable,
+        nomeArquivo,
+        label,
+        isPreviewRedonda = false,
+      ) {
+        const canvas = document.getElementById("canvas");
+        canvas.width = tamanho;
+        canvas.height = tamanho;
+        const ctx = canvas.getContext("2d");
+
+        // 1. Fundo (Azul escuro combinando com o tema)
+        ctx.fillStyle = "#0f172a"; // slate-900
+        ctx.fillRect(0, 0, tamanho, tamanho);
+
+        // 2. Define a área segura
+        // Para maskable, a imagem deve ocupar 80% do canvas (safe zone = 10% de padding em cada lado)
+        // Para normal, ocupa 90%
+        const padPercent = isMaskable ? 0.2 : 0.1;
+        const pad = tamanho * padPercent;
+        const areaSize = tamanho - pad * 2;
+
+        // 3. Desenha a imagem centralizada e redimensionada
+        // Mantém a proporção da imagem original
+        const imgRatio = img.width / img.height;
+        let drawW = areaSize;
+        let drawH = areaSize;
+
+        if (imgRatio > 1) {
+          drawH = areaSize / imgRatio;
+        } else {
+          drawW = areaSize * imgRatio;
+        }
+
+        const x = (tamanho - drawW) / 2;
+        const y = (tamanho - drawH) / 2;
+
+        ctx.drawImage(img, x, y, drawW, drawH);
+
+        // 4. Gera a imagem
+        const dataUrl = canvas.toDataURL("image/png");
+
+        // 5. Adiciona ao preview
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `
+        <span style="font-weight: bold; color: #cbd5e1;">${label}</span>
+        <img src="${dataUrl}" width="${tamanho === 512 ? 200 : 100}" class="${isPreviewRedonda ? "maskable-preview" : ""}" alt="${nomeArquivo}" />
+        <a href="${dataUrl}" download="${nomeArquivo}">
+          <button>Baixar ${nomeArquivo}</button>
+        </a>
+      `;
+        document.getElementById("preview").appendChild(div);
+      }
+    </script>
+  </body>
+</html>

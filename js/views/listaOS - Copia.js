@@ -85,7 +85,7 @@ export function renderOS() {
   document.getElementById("tableBody").innerHTML = osFiltradas
     .map((o) => {
       const foto = o.fotos_urls.length
-        ? `<div class="w-7 h-7 rounded-full overflow-hidden border border-slate-200 flex-shrink-0">${imgFoto(
+        ? `<div class="w-8 h-8 rounded-full overflow-hidden border border-slate-200 flex-shrink-0">${imgFoto(
             o.fotos_urls[0],
             "w-full h-full object-cover",
             o.id,
@@ -93,37 +93,35 @@ export function renderOS() {
           )}</div>`
         : "";
       return `
-      <tr class="table-row align-top hover:bg-slate-50 transition-colors">
-        <td class="px-3 py-3 whitespace-nowrap"><span class="text-xs font-bold text-indigo-600">${esc(numeroExibicao(o))}</span></td>
+      <tr class="table-row">
+        <td class="px-4 py-3.5"><span class="text-xs font-bold text-indigo-600 whitespace-nowrap">${esc(numeroExibicao(o))}</span></td>
         
-        <td class="px-3 py-3">
-          <div class="flex items-start gap-2 min-w-[150px]">
+        <td class="px-4 py-3.5">
+          <div class="flex items-center gap-2.5 min-w-0">
             ${
               foto ||
-              `<div class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0 mt-0.5" aria-hidden="true">${iniciais(o.nome)}</div>`
+              `<div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0" aria-hidden="true">${iniciais(o.nome)}</div>`
             }
-            <span class="text-sm font-semibold text-slate-800 break-words leading-tight tracking-tight" title="${esc(o.nome)}">${esc(o.nome) || '<span class="text-slate-400 italic font-medium">Sem nome</span>'}</span>
+            <!-- ALTERADO AQUI: Trocado 'truncate' por 'line-clamp-2 leading-tight break-words' -->
+            <span class="text-sm font-semibold text-slate-800 line-clamp-2 leading-tight break-words" title="${esc(o.nome)}">${esc(o.nome) || '<span class="text-slate-400 italic font-medium">Sem nome</span>'}</span>
           </div>
         </td>
         
-        <td class="px-3 py-3 text-xs text-slate-600 whitespace-nowrap tracking-tight">${esc(o.telefone) || "-"}</td>
+        <td class="px-4 py-3.5 text-xs text-slate-600 whitespace-nowrap">${esc(o.telefone) || "-"}</td>
         
-        <td class="px-3 py-3 text-xs text-slate-700 font-medium break-words leading-relaxed min-w-[200px] max-w-[280px]">
-          ${esc(o.servico) || "-"}${o.quantidade ? ` <span class="text-slate-400 font-normal">(${esc(o.quantidade)})</span>` : ""}
+        <!-- Coluna de SERVIÇO: text-ellipsis para cortar textos longos e não quebrar a tabela -->
+        <td class="px-4 py-3.5 text-xs text-slate-700 font-medium">
+          <div class="truncate" title="${esc(o.servico)}">
+            ${esc(o.servico) || "-"}${o.quantidade ? ` <span class="text-slate-400 font-normal">(${esc(o.quantidade)})</span>` : ""}
+          </div>
         </td>
         
-        <td class="px-3 py-3 text-xs text-slate-700 font-bold whitespace-nowrap">${esc(o.placa) || "-"}</td>
-        
-        <td class="px-3 py-3 text-xs text-slate-700 font-medium break-words max-w-[100px]">${esc(o.cor) || "-"}</td>
-        
-        <td class="px-3 py-3 text-xs text-slate-500 font-medium whitespace-nowrap tracking-tight" title="${esc(o.aparelho)}">${esc(o.aparelho) || "-"}</td>
-        
-        <td class="px-3 py-3 text-xs font-bold text-emerald-600 text-right whitespace-nowrap tabular-nums tracking-tight">${formatarMoeda(o.valor)}</td>
-        
-        <td class="px-3 py-3 text-center whitespace-nowrap">${badge(o.status)}</td>
-        
-        <td class="px-3 py-3 text-right whitespace-nowrap">
-          <button onclick="abrirDetalhes(${o.id})" class="w-7 h-7 rounded-lg hover:bg-slate-200 text-slate-600 inline-flex items-center justify-center transition" title="Ver / Editar" aria-label="Editar OS de ${esc(o.nome) || "cliente sem nome"}">
+        <td class="px-4 py-3.5 text-xs text-slate-700 font-medium truncate">${esc(o.cor) || "-"}</td>
+        <td class="px-4 py-3.5 text-xs text-slate-500 font-medium truncate" title="${esc(o.aparelho)}">${esc(o.aparelho) || "-"}</td>
+        <td class="px-4 py-3.5 text-xs font-bold text-emerald-600 whitespace-nowrap tabular-nums">${formatarMoeda(o.valor)}</td>
+        <td class="px-4 py-3.5">${badge(o.status)}</td>
+        <td class="px-4 py-3.5 text-right">
+          <button onclick="abrirDetalhes(${o.id})" class="w-8 h-8 rounded-lg hover:bg-slate-200 text-slate-600 inline-flex items-center justify-center transition" title="Ver / Editar" aria-label="Editar OS de ${esc(o.nome) || "cliente sem nome"}">
             <i class="fa-solid fa-pen-to-square text-sm" aria-hidden="true"></i>
           </button>
         </td>
@@ -162,17 +160,8 @@ export function renderOS() {
         <div class="flex flex-wrap gap-2 mb-3">
           <div class="bg-slate-50 rounded-lg px-2.5 py-1.5 flex-1 min-w-[120px]">
             <p class="text-[9px] uppercase text-slate-400 font-bold tracking-wider">Serviço</p>
-            <p class="text-[11px] font-medium text-slate-700 leading-tight">${esc(o.servico) || "-"}${o.quantidade ? ` (Qtd: ${esc(o.quantidade)})` : ""}</p>
+            <p class="text-[11px] font-medium text-slate-700 truncate">${esc(o.servico) || "-"}${o.quantidade ? ` (Qtd: ${esc(o.quantidade)})` : ""}</p>
           </div>
-          ${
-            o.placa
-              ? `
-          <div class="bg-emerald-50 border border-emerald-100 rounded-lg px-2.5 py-1.5 flex-1 min-w-[120px]">
-            <p class="text-[9px] uppercase text-emerald-600 font-bold tracking-wider">Placa</p>
-            <p class="text-[11px] font-bold text-emerald-700 truncate">${esc(o.placa)}</p>
-          </div>`
-              : ""
-          }
           ${
             o.cor
               ? `

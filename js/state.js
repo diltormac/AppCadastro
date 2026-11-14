@@ -4,6 +4,7 @@ export let estado = {
   view: "dashboard",
   filtroStatus: "all",
   filtroServico: "all",
+  filtroFinalizado: "all",
   busca: "",
   ordenacao: "data-desc",
   dataInicial: "",

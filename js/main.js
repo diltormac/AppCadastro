@@ -31,6 +31,8 @@ import {
   tratarFotoQuebrada,
   agendarBloqueioFaturamento,
   atualizarTudo,
+  adicionarFotosOS,
+  excluirFotoOS,
 } from "./ui.js";
 import { setTouchStartX, setTouchEndX, exibirFaturamento } from "./state.js";
 import { toast } from "./utils.js";
@@ -77,6 +79,34 @@ function mudarView(view) {
   fecharSidebar();
 }
 
+/* ---------- FUNÇÃO PARA FILTRAR PELO CLIQUE NOS CARDS ---------- */
+window.filtrarPorCard = function (filtro) {
+  // Reseta filtros anteriores
+  estado.filtroStatus = "all";
+  estado.filtroFinalizado = "all";
+
+  // Reseta visual dos botões de filtro
+  document
+    .querySelectorAll(".filter-btn")
+    .forEach((b) => b.classList.remove("active"));
+
+  if (filtro === "prontas") {
+    estado.filtroFinalizado = "prontas";
+    const btnTodas = document.querySelector('.filter-btn[data-status="all"]');
+    if (btnTodas) btnTodas.classList.add("active");
+  } else {
+    estado.filtroStatus = filtro;
+    const btnMatch = document.querySelector(
+      `.filter-btn[data-status="${filtro}"]`,
+    );
+    if (btnMatch) btnMatch.classList.add("active");
+  }
+
+  // Vai para a tela de OS e recarrega
+  mudarView("os");
+  recarregarListaOS();
+};
+
 /* ---------- EXPÕE FUNÇÕES USADAS EM onclick DO HTML ---------- */
 Object.assign(window, {
   alternarFaturamento,
@@ -102,6 +132,8 @@ Object.assign(window, {
   carregarMaisOS,
   carregarMaisGaleria,
   mudarView,
+  adicionarFotosOS,
+  excluirFotoOS,
 });
 
 Object.assign(window, {
@@ -126,14 +158,19 @@ document.querySelectorAll(".sidebar-link[data-view]").forEach((el) => {
 
 document.querySelectorAll(".sidebar-link[data-filter]").forEach((el) => {
   el.addEventListener("click", () => {
-    estado.filtroStatus = el.dataset.filter;
+    const statusFiltro = el.dataset.filter;
+    estado.filtroStatus = statusFiltro;
+    estado.filtroFinalizado = "all";
+
+    // Atualiza os botões da barra de filtros superior também
     document
       .querySelectorAll(".filter-btn")
       .forEach((b) => b.classList.remove("active"));
     const match = document.querySelector(
-      `.filter-btn[data-status="${el.dataset.filter}"]`,
+      `.filter-btn[data-status="${statusFiltro}"]`,
     );
     if (match) match.classList.add("active");
+
     mudarView("os");
     recarregarListaOS();
   });
@@ -146,6 +183,7 @@ document.querySelectorAll(".filter-btn").forEach((btn) => {
       .forEach((b) => b.classList.remove("active"));
     btn.classList.add("active");
     estado.filtroStatus = btn.dataset.status;
+    estado.filtroFinalizado = "all";
     recarregarListaOS();
   });
 });
@@ -189,7 +227,6 @@ const inputDataFinal = document.getElementById("dataFinal");
 const containerFiltroServico = document.getElementById("filtroServico");
 const btnLimparDatas = document.getElementById("btnLimparDatas");
 
-// 1. Inicializa o Calendário Customizado (Flatpickr)
 if (inputDataInicial && inputDataFinal) {
   const configCalendario = {
     locale: "pt",
@@ -209,7 +246,6 @@ if (inputDataInicial && inputDataFinal) {
   flatpickr(inputDataFinal, configCalendario);
 }
 
-// 2. Substitui o <select> nativo por um dropdown customizado
 async function popularFiltroServicos() {
   if (!containerFiltroServico) return;
 
@@ -242,7 +278,6 @@ async function popularFiltroServicos() {
 
 popularFiltroServicos();
 
-// 3. Botão de limpar filtros (ajustado para Flatpickr e Dropdown custom)
 if (btnLimparDatas) {
   btnLimparDatas.addEventListener("click", () => {
     estado.dataInicial = "";
@@ -293,7 +328,6 @@ window.addEventListener("resize", () => {
   if (window.innerWidth >= 1024) fecharSidebar();
 });
 
-/* Teclado: Esc fecha a camada de cima; setas navegam no lightbox. */
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
     if (fecharCamadaSuperior()) e.preventDefault();
@@ -305,7 +339,6 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-/* Card de faturamento acionável pelo teclado (Enter ou Espaço). */
 const cardFaturamento = document.getElementById("cardFaturamento");
 cardFaturamento?.addEventListener("keydown", (e) => {
   if (e.key === "Enter" || e.key === " ") {
@@ -314,7 +347,6 @@ cardFaturamento?.addEventListener("keydown", (e) => {
   }
 });
 
-/* Fotos que não carregam (apagadas do armazenamento ou sem internet). */
 document.addEventListener(
   "error",
   (e) => {
@@ -331,7 +363,6 @@ document.addEventListener(
   true,
 );
 
-/* Rede caiu / voltou enquanto o app está aberto. */
 window.addEventListener("offline", () => {
   toast(
     "Sem conexão com a internet. As alterações não serão salvas até a rede voltar.",
@@ -343,17 +374,15 @@ window.addEventListener("online", () => {
   carregarDados();
 });
 
-/* Faturamento liberado volta a ficar oculto no horário marcado. */
 if (exibirFaturamento) {
   agendarBloqueioFaturamento(
     Number(sessionStorage.getItem("@osfacil_faturamento")),
   );
 }
 
-/* ---- ESCUTA O EVENTO DO COMPARTILHAMENTO (Substitui o prompt nativo) ---- */
 window.addEventListener("osfacil_toast", (e) => {
   toast(e.detail.mensagem, e.detail.tipo);
 });
 
-atualizarTudo(); // mostra "Carregando…" enquanto a consulta não volta
+atualizarTudo();
 carregarDados();

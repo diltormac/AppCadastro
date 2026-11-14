@@ -26,6 +26,7 @@ export * from "./views/estados.js";
 export * from "./views/modalCatalogo.js";
 export * from "./views/modalAdicionarItem.js";
 export * from "./views/modalEditarOS.js";
+export * from "./views/modalFotosOS.js";
 
 /* ---------- RENDER ---------- */
 export function atualizarTudo() {
@@ -34,8 +35,7 @@ export function atualizarTudo() {
   renderGaleria();
 }
 
-/* ---------- TECLADO ----------
-   Esc fecha a camada mais acima (diálogo > lightbox > modal de edição). */
+/* ---------- TECLADO ---------- */
 export function fecharCamadaSuperior() {
   const camadas = document.querySelectorAll(".camada-modal");
   if (camadas.length) {

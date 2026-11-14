@@ -1,10 +1,5 @@
 import { statusClass } from "./config.js";
 
-/* ---------- SEGURANÇA DE TEXTO ----------
-   Todo dado vindo do banco (nome, observação, serviço, cor, aparelho...)
-   passa por esc() antes de entrar em innerHTML. Sem isso, um nome com
-   aspas (ex: JOÃO "ZÉ") quebra o campo de edição e é salvo truncado,
-   e um texto com <tags> vindo de outro aparelho seria executado. */
 const MAPA_ESCAPE = {
   "&": "&amp;",
   "<": "&lt;",
@@ -17,13 +12,11 @@ export function esc(valor) {
   return String(valor).replace(/[&<>"']/g, (c) => MAPA_ESCAPE[c]);
 }
 
-/* Só aceita URLs http(s) para imagens; qualquer outra coisa vira vazio. */
 export function urlSegura(url) {
   if (typeof url !== "string") return "";
   return /^https?:\/\//i.test(url.trim()) ? esc(url.trim()) : "";
 }
 
-/* Normaliza para busca: minúsculas e sem acento ("joão" acha "JOAO"). */
 export function normalizar(valor) {
   if (valor === null || valor === undefined) return "";
   return String(valor).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -45,7 +38,6 @@ export function ehConsertoOuSolda(os) {
   return s.includes("CONSERTO") || s.includes("SOLDA");
 }
 
-/* Número exibido da OS, respeitando a numeração separada de conserto/solda. */
 export function numeroExibicao(os) {
   if (ehConsertoOuSolda(os)) {
     return os.numero_os_conserto || os.numero_os || `#${os.id}`;
@@ -81,8 +73,6 @@ export function formatarMoeda(valor) {
   });
 }
 
-/* Lê um valor em reais digitado pelo usuário. Aceita "1.234,56" e "1234.56".
-   Retorna null quando não é um número válido. */
 export function lerValor(texto) {
   if (texto === null || texto === undefined) return null;
   let t = String(texto)
@@ -94,7 +84,6 @@ export function lerValor(texto) {
   return Number.isFinite(n) ? Math.round(n * 100) / 100 : null;
 }
 
-/* Mensagem de erro que diz o que aconteceu e o que fazer. */
 export function mensagemErro(error, acao) {
   const msg = String(error?.message || error || "");
   if (!navigator.onLine || /fetch|network|Failed to fetch/i.test(msg)) {
@@ -109,7 +98,6 @@ export function mensagemErro(error, acao) {
   return `Não foi possível ${acao}. Tente de novo em instantes.`;
 }
 
-/* Tempo máximo de espera por uma resposta do banco. */
 export function sinalTempoLimite(ms = 15000) {
   return typeof AbortSignal !== "undefined" && AbortSignal.timeout
     ? AbortSignal.timeout(ms)
@@ -123,7 +111,6 @@ export function toast(msg, tipo = "success") {
   el.className = `toast toast-${tipo} show`;
   el.setAttribute("role", tipo === "error" ? "alert" : "status");
   clearTimeout(toastTimer);
-  // Erros ficam mais tempo na tela: dá tempo de ler a orientação.
   toastTimer = setTimeout(
     () => el.classList.remove("show"),
     tipo === "error" ? 6000 : 3000,
@@ -152,12 +139,12 @@ export function copiarCampo(elementId) {
     });
 }
 
-/* ---------- MODAL DE CONFIRMAÇÃO CUSTOMIZADO ----------
-   Substitui o window.confirm() nativo por um diálogo bonito integrado ao app. */
+/* ---------- MODAL DE CONFIRMAÇÃO ---------- */
 export function confirmarAcao({
   titulo,
   mensagem,
   textoBotao = "Confirmar",
+  textoBotaoCancelar = "Cancelar",
   icone = "fa-triangle-exclamation",
   cor = "red",
 }) {
@@ -166,13 +153,24 @@ export function confirmarAcao({
     modal.className =
       "camada-modal fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4";
 
-    // Define as cores do botão e do ícone de acordo com a ação
-    const corBg = cor === "red" ? "bg-red-50" : "bg-indigo-50";
-    const corText = cor === "red" ? "text-red-500" : "text-indigo-500";
+    const corBg =
+      cor === "red"
+        ? "bg-red-50"
+        : cor === "green"
+          ? "bg-green-50"
+          : "bg-indigo-50";
+    const corText =
+      cor === "red"
+        ? "text-red-500"
+        : cor === "green"
+          ? "text-green-500"
+          : "text-indigo-500";
     const corBtn =
       cor === "red"
         ? "bg-red-600 hover:bg-red-700"
-        : "bg-indigo-600 hover:bg-indigo-700";
+        : cor === "green"
+          ? "bg-green-600 hover:bg-green-700"
+          : "bg-indigo-600 hover:bg-indigo-700";
 
     modal.innerHTML = `
       <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl flex flex-col items-center text-center">
@@ -185,7 +183,7 @@ export function confirmarAcao({
         
         <div class="flex w-full gap-3">
           <button type="button" id="btnCancelarCustom" class="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition">
-            Cancelar
+            ${textoBotaoCancelar}
           </button>
           <button type="button" id="btnConfirmarCustom" class="flex-1 px-4 py-2.5 ${corBtn} text-white rounded-xl text-sm font-bold transition shadow-sm">
             ${textoBotao}
@@ -204,7 +202,6 @@ export function confirmarAcao({
     modal.querySelector("#btnCancelarCustom").onclick = () => fechar(false);
     modal.querySelector("#btnConfirmarCustom").onclick = () => fechar(true);
 
-    // Permite fechar clicando fora ou apertando Esc
     modal.addEventListener("click", (e) => {
       if (e.target === modal) fechar(false);
     });

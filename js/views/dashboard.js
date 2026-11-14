@@ -4,6 +4,7 @@ import {
   ultimasOS,
   dashboardCarregamento,
   dashboardMensagemErro,
+  listaOS,
 } from "../state.js";
 import {
   esc,
@@ -27,6 +28,10 @@ export function renderDashboard() {
     : traco;
   document.getElementById("statAndamento").textContent = carregado
     ? resumoDashboard.andamento
+    : traco;
+
+  document.getElementById("statProntas").textContent = carregado
+    ? resumoDashboard.prontas || 0
     : traco;
 
   const faturamentoTotal = carregado
@@ -103,6 +108,8 @@ export function renderDashboard() {
       if (o.status === "Concluído") iconColor = "text-green-500 bg-green-50";
       if (o.status === "Cancelado") iconColor = "text-red-500 bg-red-50";
 
+      const isPronto = o.servico_finalizado;
+
       const foto = o.fotos_urls.length
         ? `<div class="w-12 h-12 rounded-xl overflow-hidden border border-slate-200 shadow-sm flex-shrink-0">${imgFoto(
             o.fotos_urls[0],
@@ -113,7 +120,7 @@ export function renderDashboard() {
         : "";
 
       return `
-      <div class="flex flex-col lg:flex-row lg:items-center justify-between px-4 lg:px-6 py-5 hover:bg-slate-50 hover:shadow-md transition-shadow cursor-pointer border-b border-slate-100 last:border-0 group" onclick="abrirDetalhes(${o.id})">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between px-4 lg:px-6 py-5 hover:bg-slate-50 hover:shadow-md transition-shadow cursor-pointer border-b border-slate-100 last:border-0 group ${isPronto ? "bg-green-50/30" : ""}" onclick="abrirDetalhes(${o.id})">
         <div class="flex items-start lg:items-center gap-3 lg:gap-4 min-w-0">
           ${
             foto ||
@@ -126,6 +133,7 @@ export function renderDashboard() {
             <div class="flex items-center gap-2 flex-wrap min-w-0">
               <p class="text-base lg:text-lg font-extrabold text-slate-800 truncate max-w-full" title="${esc(o.nome)}">${esc(o.nome) || '<span class="text-slate-400 italic font-medium">Sem nome</span>'}</p>
               <span class="text-[10px] font-bold text-slate-500 bg-slate-200 px-2 py-0.5 rounded-md">${esc(numeroExibicao(o))}</span>
+              ${isPronto ? `<span class="text-[9px] font-bold bg-green-100 text-green-700 px-1.5 py-0.5 rounded border border-green-300 whitespace-nowrap"><i class="fa-solid fa-check-double text-[8px] mr-1"></i>PRONTO</span>` : ""}
             </div>
             <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
               ${
@@ -159,6 +167,7 @@ export function renderDashboard() {
           </div>
         </div>
         <div class="flex items-center gap-3 lg:gap-6 mt-3 lg:mt-0 flex-shrink-0 justify-between pl-14 lg:pl-0">
+          
           <div class="flex flex-col lg:items-end">
             ${badge(o.status)}
             <div class="flex items-center gap-2 mt-1 flex-wrap lg:justify-end">
